@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  oracledb:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: cps714_oracle
+    environment:
+      - ORACLE_PWD=AdminPassword123
+    ports:
+      - "1521:1521"
+    volumes:
+      - ./init.sql:/opt/oracle/scripts/startup/init.sql
