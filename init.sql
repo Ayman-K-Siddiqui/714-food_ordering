@@ -16,4 +16,4 @@ CREATE TABLE MenuItems (
     price NUMBER(8, 2) NOT NULL,
     category VARCHAR2(50),
     is_available NUMBER(1) DEFAULT 1
-);so 
+);
