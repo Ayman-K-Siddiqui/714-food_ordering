@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Menu</h1>
+
+    {% if error %}
+        <p class="error">Could not load menu: {{ error }}</p>
+        <p>Make sure Docker Oracle is running, then refresh this page.</p>
+    {% elif not grouped_items %}
+        <p>No menu items found.</p>
+    {% else %}
+        {% for category, items in grouped_items.items() %}
+            <h2>{{ category }}</h2>
+            <ul>
+                {% for item in items %}
+                    <li>
+                        <strong>{{ item.name }}</strong>
+                        — ${{ "%.2f"|format(item.price) }}
+                        <div class="description">{{ item.description }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>
