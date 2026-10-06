@@ -2,7 +2,8 @@ import os
 from collections import OrderedDict
 
 import oracledb
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request, url_for
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 
@@ -51,6 +52,31 @@ def group_by_category(items):
     return grouped
 
 
+def create_user(email, password, first_name, last_name):
+    connection = oracledb.connect(
+        user=ORACLE_USER,
+        password=ORACLE_PASSWORD,
+        dsn=ORACLE_DSN,
+    )
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO Users (email, password_hash, first_name, last_name)
+                VALUES (:email, :password_hash, :first_name, :last_name)
+                """,
+                {
+                    "email": email,
+                    "password_hash": generate_password_hash(password),
+                    "first_name": first_name or None,
+                    "last_name": last_name or None,
+                },
+            )
+        connection.commit()
+    finally:
+        connection.close()
+
+
 @app.route("/")
 @app.route("/menu")
 def menu():
@@ -61,6 +87,38 @@ def menu():
     except oracledb.Error as exc:
         error = str(exc)
     return render_template("menu.html", grouped_items=grouped_items, error=error)
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+    form_data = {"email": "", "first_name": "", "last_name": ""}
+
+    if request.method == "POST":
+        form_data = {
+            "email": request.form.get("email", "").strip(),
+            "first_name": request.form.get("first_name", "").strip(),
+            "last_name": request.form.get("last_name", "").strip(),
+        }
+        password = request.form.get("password", "")
+
+        if not form_data["email"] or not password:
+            error = "Email and password are required."
+        else:
+            try:
+                create_user(password=password, **form_data)
+                return redirect(url_for("register", registered="1"))
+            except oracledb.IntegrityError:
+                error = "An account with that email already exists."
+            except oracledb.Error:
+                error = "Could not create your account. Please try again."
+
+    return render_template(
+        "register.html",
+        error=error,
+        registered=request.args.get("registered") == "1",
+        form_data=form_data,
+    )
 
 
 if __name__ == "__main__":

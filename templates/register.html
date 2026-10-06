@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Create an Account</h1>
+
+    {% if registered %}
+        <p class="success">Your account has been created.</p>
+    {% endif %}
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        <label for="first_name">First name</label>
+        <input id="first_name" name="first_name" type="text" value="{{ form_data.first_name }}">
+
+        <label for="last_name">Last name</label>
+        <input id="last_name" name="last_name" type="text" value="{{ form_data.last_name }}">
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" value="{{ form_data.email }}" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <p><a href="{{ url_for('menu') }}">View menu</a></p>
+</body>
+</html>
