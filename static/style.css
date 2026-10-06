@@ -34,3 +34,24 @@ li {
 .error {
     color: #a40000;
 }
+
+.success {
+    color: #176b2c;
+}
+
+form {
+    display: grid;
+    gap: 8px;
+    max-width: 360px;
+}
+
+input,
+button {
+    font: inherit;
+    padding: 8px;
+}
+
+button {
+    width: fit-content;
+    margin-top: 8px;
+}
