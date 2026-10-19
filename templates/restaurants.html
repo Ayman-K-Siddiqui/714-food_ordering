@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Choose a restaurant · Food Ordering{% endblock %}
+{% block content %}
+    <section class="intro">
+        <h1>Restaurants</h1>
+        <p class="description">Choose a restaurant to explore its menu.</p>
+    </section>
+    {% if error %}
+        <p class="error" role="alert">{{ error }}</p>
+    {% elif not restaurants %}
+        <p>No restaurants are available yet. Check back soon.</p>
+    {% else %}
+        <div class="restaurant-grid">
+            {% for restaurant in restaurants %}
+                <article class="restaurant-card">
+                    <h2>{{ restaurant.name }}</h2>
+                    <p class="description">{{ restaurant.location or 'Location coming soon' }}</p>
+                    <a class="button" href="{{ url_for('restaurant_menu', restaurant_id=restaurant.restaurant_id) }}">View menu <span aria-hidden="true">→</span></a>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
