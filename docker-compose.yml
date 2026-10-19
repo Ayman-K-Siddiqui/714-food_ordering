@@ -1,11 +1,35 @@
-version: "3.8"
 services:
-  oracledb:
-    image: container-registry.oracle.com/database/free:latest
-    container_name: cps714_oracle
-    environment:
-      - ORACLE_PWD=AdminPassword123
+  db:
+    image: gvenzl/oracle-free:23-slim-faststart
+    container_name: oracle-db
     ports:
       - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=AdminPassword123
     volumes:
-      - ./init.sql:/opt/oracle/scripts/startup/init.sql
+      - ./init.sql:/container-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  web:
+    build: .
+    container_name: flask-app
+    ports:
+      - "5001:5000"
+    volumes:
+      - .:/app
+    environment:
+      - FLASK_DEBUG=1
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - ORACLE_USER=system
+      - ORACLE_PASSWORD=AdminPassword123
+      - ORACLE_DSN=oracle-db:1521/FREEPDB1
+    command: flask run --host=0.0.0.0 --port=5000
+    depends_on:
+      db:
+        condition: service_healthy
