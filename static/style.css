@@ -55,3 +55,7 @@ button {
     width: fit-content;
     margin-top: 8px;
 }
+
+li form {
+    margin-top: 6px;
+}

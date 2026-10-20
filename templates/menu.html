@@ -3,11 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu</title>
+    <title>{% if restaurant %}{{ restaurant.name }} Menu{% else %}Menu{% endif %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Menu</h1>
+    <p><a href="{{ url_for('index') }}">All stores</a></p>
+    <h1>{% if restaurant %}{{ restaurant.name }}{% else %}Menu{% endif %}</h1>
+
+    {% if cart_message == "added" %}
+        <p class="success">Added to cart.</p>
+    {% elif cart_message == "error" %}
+        <p class="error">Could not add that item to your cart.</p>
+    {% endif %}
+
+    {% if not logged_in %}
+        <p>Register first to add items to your cart. <a href="{{ url_for('register') }}">Register</a></p>
+    {% endif %}
 
     {% if error %}
         <p class="error">Could not load menu: {{ error }}</p>
@@ -23,6 +34,12 @@
                         <strong>{{ item.name }}</strong>
                         — ${{ "%.2f"|format(item.price) }}
                         <div class="description">{{ item.description }}</div>
+                        <form method="post" action="{{ url_for('add_to_cart') }}">
+                            <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <input type="hidden" name="restaurant_id" value="{{ restaurant.restaurant_id }}">
+                            <button type="submit">Add to Cart</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>
