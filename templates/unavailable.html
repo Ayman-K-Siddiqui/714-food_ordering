@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Temporarily unavailable · Food Ordering{% endblock %}
+{% block content %}
+    <h1>Temporarily unavailable</h1>
+    <p class="error" role="alert">We couldn't connect to the database. Please try again shortly.</p>
+    <p><a href="{{ url_for('restaurants') }}">Back to restaurants</a></p>
+{% endblock %}

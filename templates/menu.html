@@ -1,40 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if restaurant %}{{ restaurant.name }} Menu{% else %}Menu{% endif %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <p><a href="{{ url_for('index') }}">All stores</a></p>
-    <h1>{% if restaurant %}{{ restaurant.name }}{% else %}Menu{% endif %}</h1>
-
+{% extends "base.html" %}
+{% block title %}{{ restaurant.name }} · Menu{% endblock %}
+{% block content %}
+    <p><a href="{{ url_for('restaurants') }}">← All restaurants</a></p>
+    <h1>{{ restaurant.name }}</h1>
+    <p class="description">{{ restaurant.location or '' }}</p>
     {% if cart_message == "added" %}
         <p class="success">Added to cart.</p>
     {% elif cart_message == "error" %}
         <p class="error">Could not add that item to your cart.</p>
     {% endif %}
-
-    {% if not logged_in %}
-        <p>Register first to add items to your cart. <a href="{{ url_for('register') }}">Register</a></p>
+    {% if not g.user %}
+        <p><a href="{{ url_for('login') }}">Log in</a> to add items to your cart.</p>
     {% endif %}
-
-    {% if error %}
-        <p class="error">Could not load menu: {{ error }}</p>
-        <p>Make sure Docker Oracle is running, then refresh this page.</p>
-    {% elif not grouped_items %}
-        <p>No menu items found.</p>
+    {% if not grouped_items %}
+        <p>No menu items are available at this restaurant yet.</p>
     {% else %}
         {% for category, items in grouped_items.items() %}
             <h2>{{ category }}</h2>
             <ul>
                 {% for item in items %}
-                    <li>
+                    <li class="menu-item">
                         <strong>{{ item.name }}</strong>
-                        — ${{ "%.2f"|format(item.price) }}
-                        <div class="description">{{ item.description }}</div>
+                        <span class="price">${{ "%.2f"|format(item.price) }}</span>
+                        <div class="description">{{ item.description or '' }}</div>
                         <form method="post" action="{{ url_for('add_to_cart') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <input type="hidden" name="item_id" value="{{ item.item_id }}">
                             <input type="hidden" name="quantity" value="1">
                             <input type="hidden" name="restaurant_id" value="{{ restaurant.restaurant_id }}">
@@ -45,5 +35,4 @@
             </ul>
         {% endfor %}
     {% endif %}
-</body>
-</html>
+{% endblock %}

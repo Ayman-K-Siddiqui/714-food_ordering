@@ -1,33 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stores</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>Stores</h1>
-    <p><a href="{{ url_for('register') }}">Register</a></p>
-
+{% extends "base.html" %}
+{% block title %}Choose a restaurant · Food Ordering{% endblock %}
+{% block content %}
+    <section class="intro">
+        <h1>Restaurants</h1>
+        <p class="description">Choose a restaurant to explore its menu.</p>
+    </section>
     {% if error %}
-        <p class="error">Could not load stores: {{ error }}</p>
-        <p>Make sure Docker Oracle is running, then refresh this page.</p>
+        <p class="error" role="alert">{{ error }}</p>
     {% elif not restaurants %}
-        <p>No stores found.</p>
+        <p>No restaurants are available yet. Check back soon.</p>
     {% else %}
-        <ul>
+        <div class="restaurant-grid">
             {% for restaurant in restaurants %}
-                <li>
-                    <a href="{{ url_for('menu', restaurant_id=restaurant.restaurant_id) }}">
-                        {{ restaurant.name }}
-                    </a>
-                    {% if restaurant.location %}
-                        <div class="description">{{ restaurant.location }}</div>
-                    {% endif %}
-                </li>
+                <article class="restaurant-card">
+                    <h2>{{ restaurant.name }}</h2>
+                    <p class="description">{{ restaurant.location or 'Location coming soon' }}</p>
+                    <a class="button" href="{{ url_for('restaurant_menu', restaurant_id=restaurant.restaurant_id) }}">View menu <span aria-hidden="true">→</span></a>
+                </article>
             {% endfor %}
-        </ul>
+        </div>
     {% endif %}
-</body>
-</html>
+{% endblock %}
