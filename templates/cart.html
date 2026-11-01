@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Your cart · Food Ordering{% endblock %}
+{% block content %}
+<section class="cart-page">
+    <h1>Your cart</h1>
+
+    {% if checkout_message == "empty" %}
+        <p class="error" role="alert">Your cart is empty. Add something before checking out.</p>
+    {% elif checkout_message == "error" %}
+        <p class="error" role="alert">Checkout failed. Please try again.</p>
+    {% endif %}
+    {% if cart_message == "updated" %}
+        <p class="success" role="status">Cart updated.</p>
+    {% elif cart_message == "removed" %}
+        <p class="success" role="status">Item removed.</p>
+    {% elif cart_message == "error" %}
+        <p class="error" role="alert">Could not update your cart.</p>
+    {% endif %}
+
+    {% if not items %}
+        <div class="cart-empty">
+            <p>Your cart is empty.</p>
+            <a class="button" href="{{ url_for('restaurants') }}">Browse restaurants</a>
+        </div>
+    {% else %}
+        <p class="description">
+            Ordering from
+            <a href="{{ url_for('restaurant_menu', restaurant_id=items[0].restaurant_id) }}">{{ items[0].restaurant }}</a>
+        </p>
+        <ul class="cart-items">
+            {% for item in items %}
+                <li class="cart-item">
+                    <div class="cart-item-info">
+                        <strong>{{ item.name }}</strong>
+                        <span class="description">${{ "%.2f"|format(item.price) }} each</span>
+                    </div>
+                    <form class="cart-qty-form" method="post" action="{{ url_for('update_cart') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                        <label class="visually-hidden" for="qty-{{ item.item_id }}">Quantity for {{ item.name }}</label>
+                        <input id="qty-{{ item.item_id }}" name="quantity" type="number" min="0" max="99" value="{{ item.quantity }}">
+                        <button type="submit" class="button-secondary">Update</button>
+                    </form>
+                    <span class="cart-line-total">${{ "%.2f"|format(item.line_total) }}</span>
+                    <form class="cart-remove-form" method="post" action="{{ url_for('remove_from_cart') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="item_id" value="{{ item.item_id }}">
+                        <button type="submit" class="button-link" aria-label="Remove {{ item.name }}">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="cart-summary">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span class="cart-total">${{ "%.2f"|format(total) }}</span>
+            </div>
+            <form method="post" action="{{ url_for('checkout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="checkout-button">Place order</button>
+            </form>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

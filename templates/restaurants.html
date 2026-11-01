@@ -1,10 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Choose a restaurant · Food Ordering{% endblock %}
 {% block content %}
-    <section class="intro">
-        <h1>Restaurants</h1>
-        <p class="description">Choose a restaurant to explore its menu.</p>
-    </section>
+    {% if not g.user %}
+        <section class="welcome-hero">
+            <div class="welcome-text">
+                <p class="welcome-eyebrow">Local food, delivered</p>
+                <h1>Your favourite local restaurants, all in one place.</h1>
+                <p class="welcome-lead">Browse menus, build your order and track it from the kitchen to your door.</p>
+                <div class="welcome-actions">
+                    <a class="button welcome-primary" href="{{ url_for('register') }}">Create an account</a>
+                    <a class="button welcome-secondary" href="{{ url_for('login') }}">Log in</a>
+                </div>
+            </div>
+            <ul class="welcome-steps" aria-label="How it works">
+                <li><span class="welcome-step-num">1</span><div><strong>Pick a restaurant</strong><span>Burgers, pizza, tacos and more.</span></div></li>
+                <li><span class="welcome-step-num">2</span><div><strong>Fill your cart</strong><span>Add items and adjust quantities.</span></div></li>
+                <li><span class="welcome-step-num">3</span><div><strong>Track your order</strong><span>Watch it go from Pending to Ready.</span></div></li>
+            </ul>
+        </section>
+        <section class="intro">
+            <h2>Restaurants</h2>
+            <p class="description">Take a look around. Log in when you're ready to order.</p>
+        </section>
+    {% else %}
+        <section class="intro welcome-back">
+            <h1>Hi {{ g.user.first_name or 'there' }}, what are you craving?</h1>
+            <p class="description">Choose a restaurant to explore its menu.</p>
+        </section>
+    {% endif %}
     {% if error %}
         <p class="error" role="alert">{{ error }}</p>
     {% elif not restaurants %}
