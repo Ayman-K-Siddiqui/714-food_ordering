@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.order_id }} · Food Ordering{% endblock %}
+{% block content %}
+<section class="order-page">
+    <p><a href="{{ url_for('orders') }}">&larr; All orders</a></p>
+    {% if placed %}
+        <p class="success" role="status">Order placed! The restaurant has received it.</p>
+    {% endif %}
+    <div class="order-card">
+        <div class="order-card-head">
+            <div>
+                <h1>Order #{{ order.order_id }}</h1>
+                <p class="description">
+                    {{ order.restaurant }}{% if order.location %} &middot; {{ order.location }}{% endif %}
+                    &middot; {{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}
+                </p>
+            </div>
+            <span class="order-status order-status-{{ order.status | lower }}">{{ order.status }}</span>
+        </div>
+
+        <ol class="order-progress" aria-label="Order progress">
+            {% set current = statuses.index(order.status) if order.status in statuses else 0 %}
+            {% for s in statuses %}
+                <li class="{{ 'done' if loop.index0 <= current else '' }}">{{ s }}</li>
+            {% endfor %}
+        </ol>
+
+        <ul class="order-lines">
+            {% for line in lines %}
+                <li>
+                    <span><span class="order-qty">{{ line.quantity }}&times;</span> {{ line.name }}</span>
+                    <span>${{ "%.2f"|format(line.line_total) }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+        <div class="order-total-row">
+            <span>Total</span>
+            <span class="order-total">${{ "%.2f"|format(order.total) }}</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

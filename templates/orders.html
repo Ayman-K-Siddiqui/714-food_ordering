@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}My orders · Food Ordering{% endblock %}
+{% block content %}
+<section class="orders-page">
+    <h1>My orders</h1>
+    {% if not orders %}
+        <div class="orders-empty">
+            <p>You haven't placed any orders yet.</p>
+            <a class="button" href="{{ url_for('restaurants') }}">Find something to eat</a>
+        </div>
+    {% else %}
+        <ul class="orders-list">
+            {% for order in orders %}
+                <li>
+                    <a class="order-row" href="{{ url_for('order_details', order_id=order.order_id) }}">
+                        <div>
+                            <strong>{{ order.restaurant }}</strong>
+                            <span class="description">
+                                Order #{{ order.order_id }} &middot; {{ order.created_at.strftime('%b %d, %Y %I:%M %p') }}
+                                &middot; {{ order.item_count }} item{{ '' if order.item_count == 1 else 's' }}
+                            </span>
+                        </div>
+                        <div class="order-row-right">
+                            <span class="order-status order-status-{{ order.status | lower }}">{{ order.status }}</span>
+                            <span class="order-total">${{ "%.2f"|format(order.total) }}</span>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</section>
+{% endblock %}

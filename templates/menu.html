@@ -5,9 +5,11 @@
     <h1>{{ restaurant.name }}</h1>
     <p class="description">{{ restaurant.location or '' }}</p>
     {% if cart_message == "added" %}
-        <p class="success">Added to cart.</p>
+        <p class="success">Added to cart. <a href="{{ url_for('cart') }}">View cart</a></p>
     {% elif cart_message == "error" %}
         <p class="error">Could not add that item to your cart.</p>
+    {% elif cart_message == "other_restaurant" %}
+        <p class="error">Your cart has items from another restaurant. Clear your cart to order from this one.</p>
     {% endif %}
     {% if not g.user %}
         <p><a href="{{ url_for('login') }}">Log in</a> to add items to your cart.</p>

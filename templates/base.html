@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Food Ordering{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -12,6 +14,9 @@
         <nav aria-label="Main navigation">
             <a href="{{ url_for('restaurants') }}">Restaurants</a>
             {% if g.user %}
+                <a href="{{ url_for('orders') }}">My Orders</a>
+                <a href="{{ url_for('kitchen') }}">Kitchen</a>
+                <a class="nav-cart" href="{{ url_for('cart') }}">Cart{% if cart_count %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
                 <span>Hi, {{ g.user.first_name or g.user.email }}</span>
                 <form method="post" action="{{ url_for('logout') }}" class="logout-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
