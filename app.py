@@ -63,13 +63,13 @@ def load_current_user():
     if user_id is not None:
         try:
             rows = query_rows(
-                "SELECT user_id, email, first_name FROM Users WHERE user_id = :user_id",
+                "SELECT user_id, email, first_name, role, restaurant_id FROM Users WHERE user_id = :user_id",
                 {"user_id": user_id},
             )
         except oracledb.Error:
             return render_template("unavailable.html"), 503
         if rows:
-            g.user = dict(zip(("user_id", "email", "first_name"), rows[0]))
+            g.user = dict(zip(("user_id", "email", "first_name", "role", "restaurant_id"), rows[0]))
         else:
             session.clear()
 
@@ -78,7 +78,7 @@ def load_current_user():
 def inject_cart_count():
     """Number of items in the logged-in user's cart, for the nav badge."""
     count = 0
-    if getattr(g, "user", None):
+    if getattr(g, "user", None) and g.user["role"] == "customer":
         try:
             connection = get_connection()
             try:
@@ -104,6 +104,20 @@ def login_required(view):
             return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped
+
+
+def staff_required(view):
+    @wraps(view)
+    @login_required
+    def wrapped(*args, **kwargs):
+        if g.user["role"] != "staff" or g.user["restaurant_id"] is None:
+            abort(403)
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def account_home(role):
+    return "kitchen" if role == "staff" else "restaurants"
 
 
 ORACLE_USER = os.getenv("ORACLE_USER", "system")
@@ -356,22 +370,18 @@ def checkout():
 
 
 @app.route("/kitchen")
-@login_required
+@staff_required
 def kitchen():
     view = request.args.get("view", "active")
     if view not in ("active", "completed"):
         view = "active"
-    restaurant_id = request.args.get("restaurant_id", type=int)
+    restaurant_id = g.user["restaurant_id"]
 
     status_sql = "o.status <> 'Completed'" if view == "active" else "o.status = 'Completed'"
-    params = {}
-    restaurant_sql = ""
-    if restaurant_id:
-        restaurant_sql = " AND o.restaurant_id = :restaurant_id"
-        params["restaurant_id"] = restaurant_id
+    params = {"restaurant_id": restaurant_id}
+    restaurant_sql = " AND o.restaurant_id = :restaurant_id"
 
     try:
-        restaurant_rows = query_rows("SELECT restaurant_id, name FROM Restaurants ORDER BY name")
         order_rows = query_rows(
             f"""
             SELECT o.order_id, o.created_at, o.status, o.total, r.name, u.email
@@ -406,15 +416,13 @@ def kitchen():
          "restaurant": rname, "customer": email, "lines": items_by_order.get(oid, [])}
         for oid, created, status, total, rname, email in order_rows
     ]
-    restaurants_list = [{"restaurant_id": rid, "name": name} for rid, name in restaurant_rows]
     return render_template(
         "kitchen.html", orders=orders, statuses=ORDER_STATUSES, view=view,
-        restaurants=restaurants_list, selected_restaurant=restaurant_id,
     )
 
 
 @app.route("/kitchen/<int:order_id>/status", methods=["POST"])
-@login_required
+@staff_required
 def update_order_status(order_id):
     status = request.form.get("status")
     if status not in ORDER_STATUSES:
@@ -423,9 +431,13 @@ def update_order_status(order_id):
     try:
         with connection.cursor() as cursor:
             cursor.execute(
-                "UPDATE Orders SET status = :status WHERE order_id = :order_id",
-                {"status": status, "order_id": order_id},
+                """UPDATE Orders SET status = :status
+                WHERE order_id = :order_id AND restaurant_id = :restaurant_id""",
+                {"status": status, "order_id": order_id,
+                 "restaurant_id": g.user["restaurant_id"]},
             )
+            if cursor.rowcount == 0:
+                abort(404)
         connection.commit()
     except oracledb.Error:
         return render_template("unavailable.html"), 503
@@ -434,7 +446,6 @@ def update_order_status(order_id):
     return redirect(url_for(
         "kitchen",
         view=request.form.get("view", "active"),
-        restaurant_id=request.form.get("restaurant_id", type=int) or None,
     ))
 
 
@@ -589,7 +600,7 @@ def order_details(order_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if g.user:
-        return redirect(url_for("restaurants"))
+        return redirect(url_for(account_home(g.user["role"])))
     error = None
     email = request.form.get("email", "").strip()
     status = 200
@@ -600,14 +611,14 @@ def login():
         else:
             try:
                 rows = query_rows(
-                    "SELECT user_id, password_hash FROM Users WHERE email = :email",
+                    "SELECT user_id, password_hash, role FROM Users WHERE email = :email",
                     {"email": email},
                 )
                 if rows and check_password_hash(rows[0][1], password):
                     session.clear()
                     session["user_id"] = int(rows[0][0])
                     session.permanent = True
-                    return redirect(url_for("restaurants"))
+                    return redirect(url_for(account_home(rows[0][2])))
                 error = "Invalid email or password."
             except oracledb.Error:
                 error = "Login is temporarily unavailable. Please try again shortly."
@@ -625,7 +636,7 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if g.user:
-        return redirect(url_for("restaurants"))
+        return redirect(url_for(account_home(g.user["role"])))
     error = None
     form_data = {"email": "", "first_name": "", "last_name": ""}
 

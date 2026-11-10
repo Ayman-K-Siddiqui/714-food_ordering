@@ -10,21 +10,10 @@
     <div class="kitchen-toolbar">
         <div class="kitchen-tabs" role="tablist">
             <a class="kitchen-tab {{ 'active' if view == 'active' else '' }}"
-               href="{{ url_for('kitchen', view='active', restaurant_id=selected_restaurant) }}">Active</a>
+               href="{{ url_for('kitchen', view='active') }}">Active</a>
             <a class="kitchen-tab {{ 'active' if view == 'completed' else '' }}"
-               href="{{ url_for('kitchen', view='completed', restaurant_id=selected_restaurant) }}">Completed</a>
+               href="{{ url_for('kitchen', view='completed') }}">Completed</a>
         </div>
-        <form class="kitchen-filter" method="get" action="{{ url_for('kitchen') }}">
-            <input type="hidden" name="view" value="{{ view }}">
-            <label for="restaurant-filter">Restaurant</label>
-            <select id="restaurant-filter" name="restaurant_id" onchange="this.form.submit()">
-                <option value="">All restaurants</option>
-                {% for r in restaurants %}
-                    <option value="{{ r.restaurant_id }}" {% if r.restaurant_id == selected_restaurant %}selected{% endif %}>{{ r.name }}</option>
-                {% endfor %}
-            </select>
-            <noscript><button type="submit">Filter</button></noscript>
-        </form>
     </div>
 
     {% if not orders %}
@@ -53,7 +42,6 @@
                           action="{{ url_for('update_order_status', order_id=order.order_id) }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="view" value="{{ view }}">
-                        <input type="hidden" name="restaurant_id" value="{{ selected_restaurant or '' }}">
                         <select name="status" aria-label="Order status">
                             {% for s in statuses %}
                                 <option value="{{ s }}" {% if s == order.status %}selected{% endif %}>{{ s }}</option>

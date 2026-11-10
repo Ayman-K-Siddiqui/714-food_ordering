@@ -19,6 +19,8 @@ class AppTests(unittest.TestCase):
         self.query = patch("app.query_rows").start()
         self.addCleanup(patch.stopall)
         self.query.return_value = []
+        self.connection = patch("app.get_connection").start()
+        self.connection.return_value.cursor.return_value.__enter__.return_value.fetchone.return_value = (0,)
 
     def post(self, path, data=None):
         with self.client.session_transaction() as sess:
@@ -26,7 +28,7 @@ class AppTests(unittest.TestCase):
         return self.client.post(path, data={"csrf_token": "test-csrf", **(data or {})})
 
     def sign_in(self):
-        self.query.return_value = [(42, self.password_hash)]
+        self.query.return_value = [(42, self.password_hash, "customer")]
         return self.post("/login", {"email": "user@example.com", "password": "test-password"})
 
     def test_login_uses_existing_password_hash_and_stores_only_identity(self):
@@ -40,7 +42,7 @@ class AppTests(unittest.TestCase):
         self.assertIn("SameSite=Lax", response.headers["Set-Cookie"])
 
     def test_invalid_credentials_do_not_authenticate(self):
-        for rows in ([], [(42, self.password_hash)]):
+        for rows in ([], [(42, self.password_hash, "customer")]):
             with self.subTest(rows=bool(rows)):
                 self.query.return_value = rows
                 response = self.post("/login", {"email": "user@example.com", "password": "wrong"})
@@ -54,12 +56,12 @@ class AppTests(unittest.TestCase):
 
     def test_session_survives_navigation_and_logout_clears_it(self):
         self.sign_in()
-        self.query.side_effect = [[(42, "user@example.com", "Hasan")], [(1, "Burger Joint", "123 Main St")]]
+        self.query.side_effect = [[(42, "user@example.com", "Hasan", "customer", None)], [(1, "Burger Joint", "123 Main St")]]
         response = self.client.get("/")
         self.assertIn(b"Hi, Hasan", response.data)
         self.assertIn(b"Burger Joint", response.data)
         self.query.side_effect = None
-        self.query.return_value = [(42, "user@example.com", "Hasan")]
+        self.query.return_value = [(42, "user@example.com", "Hasan", "customer", None)]
         self.assertEqual(self.post("/logout").status_code, 302)
         with self.client.session_transaction() as sess:
             self.assertNotIn("user_id", sess)
@@ -155,7 +157,7 @@ class AppTests(unittest.TestCase):
 
     def test_cart_uses_authenticated_user_and_returns_to_menu(self):
         self.sign_in()
-        self.query.return_value = [(42, "user@example.com", "Hasan")]
+        self.query.return_value = [(42, "user@example.com", "Hasan", "customer", None)]
         with patch("app.add_item_to_cart") as add:
             response = self.post("/add_to_cart", {
                 "user_id": "999", "item_id": "7", "quantity": "2", "restaurant_id": "2",
@@ -165,7 +167,7 @@ class AppTests(unittest.TestCase):
 
     def test_cart_database_failure_returns_to_menu(self):
         self.sign_in()
-        self.query.return_value = [(42, "user@example.com", "Hasan")]
+        self.query.return_value = [(42, "user@example.com", "Hasan", "customer", None)]
         with patch("app.add_item_to_cart", side_effect=oracledb.DatabaseError("private details")):
             response = self.post("/add_to_cart", {"item_id": "7", "restaurant_id": "2"})
         self.assertEqual(response.location, "/restaurants/2/menu?cart=error")
@@ -179,6 +181,86 @@ class AppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'action="/add_to_cart"', response.data)
         self.assertIn(b'name="csrf_token"', response.data)
+
+    def authenticate(self, role="staff", restaurant_id=2):
+        with self.client.session_transaction() as sess:
+            sess["user_id"] = 42
+        self.query.return_value = [(42, "staff@example.com", "Staff", role, restaurant_id)]
+
+    def test_staff_login_redirects_to_kitchen(self):
+        self.query.return_value = [(42, self.password_hash, "staff")]
+        response = self.post("/login", {"email": "staff@example.com", "password": "test-password"})
+        self.assertEqual(response.location, "/kitchen")
+
+    def test_signed_in_account_pages_redirect_by_role(self):
+        for role, destination in (("customer", "/"), ("staff", "/kitchen")):
+            self.authenticate(role)
+            for path in ("/login", "/register"):
+                self.assertEqual(self.client.get(path).location, destination)
+
+    def test_kitchen_requires_staff_for_read_and_write(self):
+        self.assertEqual(self.client.get("/kitchen").location, "/login")
+        self.assertEqual(self.post("/kitchen/1/status", {"status": "Ready"}).location, "/login")
+        for role, restaurant_id in (("customer", None), ("staff", None)):
+            self.authenticate(role, restaurant_id)
+            self.assertEqual(self.client.get("/kitchen").status_code, 403)
+            self.assertEqual(self.post("/kitchen/1/status", {"status": "Ready"}).status_code, 403)
+        self.connection.assert_not_called()
+
+    def test_kitchen_scopes_orders_and_items_to_staff_restaurant(self):
+        from datetime import datetime
+        for view in ("active", "completed"):
+            self.authenticate()
+            self.query.side_effect = [
+                [(42, "staff@example.com", "Staff", "staff", 2)],
+                [(7, datetime(2026, 11, 9), "Ready", Decimal("12.99"), "Pizza Palace", "customer@example.com")],
+                [(7, "Pizza", 2)],
+            ]
+            self.query.reset_mock()
+            response = self.client.get(f"/kitchen?restaurant_id=1&view={view}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b"Pizza Palace", response.data)
+            self.assertIn(b"Pizza", response.data)
+            self.assertNotIn(b"All restaurants", response.data)
+            for call in self.query.call_args_list[1:]:
+                self.assertIn("o.restaurant_id = :restaurant_id", call.args[0])
+                self.assertEqual(call.args[1], {"restaurant_id": 2})
+            self.query.side_effect = None
+
+    def test_status_update_cannot_target_another_restaurant(self):
+        self.authenticate()
+        cursor = self.connection.return_value.cursor.return_value.__enter__.return_value
+        for affected, expected in ((0, 404), (1, 302)):
+            cursor.rowcount = affected
+            self.connection.return_value.commit.reset_mock()
+            response = self.post("/kitchen/7/status", {
+                "status": "Ready", "restaurant_id": "1", "view": "completed",
+            })
+            self.assertEqual(response.status_code, expected)
+            self.assertIn("restaurant_id = :restaurant_id", cursor.execute.call_args.args[0])
+            self.assertEqual(cursor.execute.call_args.args[1], {
+                "status": "Ready", "order_id": 7, "restaurant_id": 2,
+            })
+            self.assertEqual(self.connection.return_value.commit.called, bool(affected))
+            if affected:
+                self.assertEqual(response.location, "/kitchen?view=completed")
+
+    def test_staff_status_update_requires_valid_status_and_csrf(self):
+        self.authenticate()
+        self.assertEqual(self.client.post("/kitchen/7/status").status_code, 400)
+        self.assertEqual(self.post("/kitchen/7/status", {"status": "invalid"}).status_code, 400)
+        self.connection.assert_not_called()
+
+    def test_navigation_by_role(self):
+        for role in ("staff", "customer"):
+            with application.app.test_request_context():
+                from flask import g, render_template
+                g.user = {"user_id": 42, "role": role, "first_name": "Test", "email": "test@example.com"}
+                html = render_template("base.html", cart_count=0)
+            self.assertEqual('href="/kitchen"' in html, role == "staff")
+            self.assertEqual('>Restaurants</a>' in html, role == "customer")
+            self.assertEqual('href="/cart"' in html, role == "customer")
+            self.assertEqual('>My Orders</a>' in html, role == "customer")
 
 
 if __name__ == "__main__":

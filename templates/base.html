@@ -10,13 +10,18 @@
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="{{ url_for('restaurants') }}">Food Ordering</a>
+        <a class="brand" href="{{ url_for('kitchen' if g.user and g.user.role == 'staff' else 'restaurants') }}">Food Ordering</a>
         <nav aria-label="Main navigation">
-            <a href="{{ url_for('restaurants') }}">Restaurants</a>
+            {% if not g.user or g.user.role == 'customer' %}
+                <a href="{{ url_for('restaurants') }}">Restaurants</a>
+            {% endif %}
             {% if g.user %}
-                <a href="{{ url_for('orders') }}">My Orders</a>
+                {% if g.user.role == 'staff' %}
                 <a href="{{ url_for('kitchen') }}">Kitchen</a>
+                {% else %}
+                <a href="{{ url_for('orders') }}">My Orders</a>
                 <a class="nav-cart" href="{{ url_for('cart') }}">Cart{% if cart_count %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
+                {% endif %}
                 <span>Hi, {{ g.user.first_name or g.user.email }}</span>
                 <form method="post" action="{{ url_for('logout') }}" class="logout-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
