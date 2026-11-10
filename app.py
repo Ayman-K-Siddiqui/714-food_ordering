@@ -557,6 +557,29 @@ def orders():
     return render_template("orders.html", orders=order_list)
 
 
+def get_order_review(order_id, user_id):
+    rows = query_rows(
+        """
+        SELECT review_id, rating, comments
+        FROM Reviews
+        WHERE order_id = :order_id AND user_id = :user_id
+        """,
+        {"order_id": order_id, "user_id": user_id},
+    )
+    if not rows:
+        return None
+    review_id, rating, comments = rows[0]
+    return {"review_id": review_id, "rating": int(rating), "comments": comments or ""}
+
+
+def user_owns_order(order_id, user_id):
+    rows = query_rows(
+        "SELECT 1 FROM Orders WHERE order_id = :order_id AND user_id = :user_id",
+        {"order_id": order_id, "user_id": user_id},
+    )
+    return bool(rows)
+
+
 @app.route("/orders/<int:order_id>")
 @login_required
 def order_details(order_id):
@@ -582,6 +605,7 @@ def order_details(order_id):
             """,
             {"order_id": order_id},
         )
+        review = get_order_review(order_id, g.user["user_id"])
     except oracledb.Error:
         return render_template("unavailable.html"), 503
     oid, created, rname, location, total, status = rows[0]
@@ -592,9 +616,65 @@ def order_details(order_id):
         for name, quantity, price in item_rows
     ]
     return render_template(
-        "order_details.html", order=order, lines=lines,
+        "order_details.html", order=order, lines=lines, review=review,
         statuses=ORDER_STATUSES, placed=request.args.get("placed") == "1",
+        review_message=request.args.get("review"),
     )
+
+
+@app.route("/orders/<int:order_id>/review", methods=["POST"])
+@login_required
+def create_review(order_id):
+    rating = request.form.get("rating", type=int)
+    comments = (request.form.get("comments") or "").strip()
+    if rating not in (1, 2, 3, 4, 5):
+        return redirect(url_for("order_details", order_id=order_id, review="invalid"))
+    comments = comments[:1000]
+    try:
+        if not user_owns_order(order_id, g.user["user_id"]):
+            abort(404)
+        run_write(
+            """
+            INSERT INTO Reviews (user_id, order_id, rating, comments)
+            VALUES (:user_id, :order_id, :rating, :comments)
+            """,
+            {
+                "user_id": g.user["user_id"],
+                "order_id": order_id,
+                "rating": rating,
+                "comments": comments or None,
+            },
+        )
+    except oracledb.IntegrityError:
+        return redirect(url_for("order_details", order_id=order_id, review="exists"))
+    except oracledb.Error:
+        return redirect(url_for("order_details", order_id=order_id, review="error"))
+    return redirect(url_for("order_details", order_id=order_id, review="saved"))
+
+
+@app.route("/orders/<int:order_id>/review/delete", methods=["POST"])
+@login_required
+def delete_review(order_id):
+    review_id = request.form.get("review_id", type=int)
+    if not review_id:
+        return redirect(url_for("order_details", order_id=order_id, review="error"))
+    try:
+        run_write(
+            """
+            DELETE FROM Reviews
+            WHERE review_id = :review_id
+              AND order_id = :order_id
+              AND user_id = :user_id
+            """,
+            {
+                "review_id": review_id,
+                "order_id": order_id,
+                "user_id": g.user["user_id"],
+            },
+        )
+    except oracledb.Error:
+        return redirect(url_for("order_details", order_id=order_id, review="error"))
+    return redirect(url_for("order_details", order_id=order_id, review="deleted"))
 
 
 @app.route("/login", methods=["GET", "POST"])
