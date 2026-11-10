@@ -38,5 +38,51 @@
             <span class="order-total">${{ "%.2f"|format(order.total) }}</span>
         </div>
     </div>
+
+    <section class="review-card" aria-labelledby="review-heading">
+        <h2 id="review-heading">Your review</h2>
+        {% if review_message == "saved" %}
+            <p class="success" role="status">Review saved.</p>
+        {% elif review_message == "deleted" %}
+            <p class="success" role="status">Review deleted.</p>
+        {% elif review_message == "invalid" %}
+            <p class="error">Choose a rating from 1 to 5 stars.</p>
+        {% elif review_message == "exists" %}
+            <p class="error">You already reviewed this order. Delete it first to write a new one.</p>
+        {% elif review_message == "error" %}
+            <p class="error">Could not update your review. Please try again.</p>
+        {% endif %}
+
+        {% if review %}
+            <p class="review-stars" aria-label="{{ review.rating }} out of 5 stars">
+                {% for n in range(1, 6) %}{{ '★' if n <= review.rating else '☆' }}{% endfor %}
+            </p>
+            {% if review.comments %}
+                <p>{{ review.comments }}</p>
+            {% endif %}
+            <form method="post" action="{{ url_for('delete_review', order_id=order.order_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="review_id" value="{{ review.review_id }}">
+                <button type="submit">Delete review</button>
+            </form>
+        {% else %}
+            <p class="description">Rate this order and optionally leave a comment.</p>
+            <form method="post" action="{{ url_for('create_review', order_id=order.order_id) }}" class="review-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <fieldset>
+                    <legend>Stars</legend>
+                    {% for n in range(1, 6) %}
+                        <label>
+                            <input type="radio" name="rating" value="{{ n }}" required>
+                            {{ n }}
+                        </label>
+                    {% endfor %}
+                </fieldset>
+                <label for="comments">Review</label>
+                <textarea id="comments" name="comments" rows="4" maxlength="1000" placeholder="How was the food?"></textarea>
+                <button type="submit">Save review</button>
+            </form>
+        {% endif %}
+    </section>
 </section>
 {% endblock %}

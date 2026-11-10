@@ -170,6 +170,65 @@ class AppTests(unittest.TestCase):
             response = self.post("/add_to_cart", {"item_id": "7", "restaurant_id": "2"})
         self.assertEqual(response.location, "/restaurants/2/menu?cart=error")
 
+    def test_review_requires_login_and_csrf(self):
+        with patch("app.run_write") as write:
+            self.assertEqual(self.client.post("/orders/1/review").status_code, 400)
+            self.assertEqual(self.post("/orders/1/review", {"rating": "5"}).location, "/login")
+            self.assertEqual(self.client.post("/orders/1/review/delete").status_code, 400)
+            self.assertEqual(self.post("/orders/1/review/delete", {"review_id": "1"}).location, "/login")
+        write.assert_not_called()
+
+    def test_create_review_uses_authenticated_user(self):
+        self.sign_in()
+        self.query.side_effect = [
+            [(42, "user@example.com", "Hasan")],
+            [(1,)],
+        ]
+        with patch("app.run_write") as write:
+            response = self.post("/orders/9/review", {
+                "user_id": "999", "rating": "4", "comments": "Tasty",
+            })
+        write.assert_called_once()
+        sql, params = write.call_args.args
+        self.assertIn("INSERT INTO Reviews", sql)
+        self.assertEqual(params["user_id"], 42)
+        self.assertEqual(params["order_id"], 9)
+        self.assertEqual(params["rating"], 4)
+        self.assertEqual(params["comments"], "Tasty")
+        self.assertEqual(response.location, "/orders/9?review=saved")
+
+    def test_create_review_rejects_invalid_rating(self):
+        self.sign_in()
+        self.query.return_value = [(42, "user@example.com", "Hasan")]
+        with patch("app.run_write") as write:
+            response = self.post("/orders/9/review", {"rating": "6", "comments": "Nope"})
+        write.assert_not_called()
+        self.assertEqual(response.location, "/orders/9?review=invalid")
+
+    def test_create_review_for_someone_elses_order_is_404(self):
+        self.sign_in()
+        self.query.side_effect = [
+            [(42, "user@example.com", "Hasan")],
+            [],
+        ]
+        with patch("app.run_write") as write:
+            response = self.post("/orders/9/review", {"rating": "5"})
+        write.assert_not_called()
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_review_uses_authenticated_user(self):
+        self.sign_in()
+        self.query.return_value = [(42, "user@example.com", "Hasan")]
+        with patch("app.run_write") as write:
+            response = self.post("/orders/9/review/delete", {"review_id": "3"})
+        write.assert_called_once()
+        sql, params = write.call_args.args
+        self.assertIn("DELETE FROM Reviews", sql)
+        self.assertEqual(params["user_id"], 42)
+        self.assertEqual(params["order_id"], 9)
+        self.assertEqual(params["review_id"], 3)
+        self.assertEqual(response.location, "/orders/9?review=deleted")
+
     def test_store_menu_alias_renders_cart_form(self):
         self.query.side_effect = [
             [(2, "Pizza Palace", "456 Queen St")],

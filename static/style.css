@@ -849,6 +849,46 @@ select:focus {
     margin-right: 6px;
 }
 
+.review-card {
+    margin-top: 20px;
+    padding: 24px;
+    background: var(--card, #FFFFFF);
+    border-radius: var(--radius, 14px);
+    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
+}
+
+.review-card h2 {
+    margin-top: 0;
+}
+
+.review-stars {
+    margin: 0 0 8px;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    color: #d97706;
+}
+
+.review-form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0 0 12px;
+}
+
+.review-form legend {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.review-form textarea {
+    width: 100%;
+    font: inherit;
+    padding: 8px;
+    border: 1px solid var(--border, #E2E8F0);
+    border-radius: 8px;
+    resize: vertical;
+}
+}
+
 @media (max-width: 640px) {
     .cart-item {
         grid-template-columns: 1fr auto;
