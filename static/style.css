@@ -741,6 +741,22 @@ select:focus {
     margin-right: 6px;
 }
 
+.kitchen-review {
+    margin: 1rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.kitchen-review h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+.kitchen-review-comment {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .kitchen-order-foot {
     display: flex;
     align-items: center;

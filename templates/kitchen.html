@@ -37,6 +37,19 @@
                         <li><span class="kitchen-qty">{{ item.quantity }}&times;</span> {{ item.name }}</li>
                     {% endfor %}
                 </ul>
+                <section class="kitchen-review" aria-label="Customer review for order #{{ order.order_id }}">
+                    <h3>Customer review</h3>
+                    {% if order.review %}
+                        <p class="review-stars" aria-label="{{ order.review.rating }} out of 5 stars">
+                            {% for n in range(1, 6) %}{{ '★' if n <= order.review.rating else '☆' }}{% endfor %}
+                        </p>
+                        {% if order.review.comments %}
+                            <p class="kitchen-review-comment">{{ order.review.comments }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="description">No customer review yet.</p>
+                    {% endif %}
+                </section>
                 <div class="kitchen-order-foot">
                     <span class="kitchen-total">${{ '%.2f'|format(order.total) }}</span>
                     <form class="kitchen-status-form" method="post"

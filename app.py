@@ -427,10 +427,12 @@ def kitchen():
     try:
         order_rows = query_rows(
             f"""
-            SELECT o.order_id, o.created_at, o.status, o.total, r.name, u.email
+            SELECT o.order_id, o.created_at, o.status, o.total, r.name, u.email,
+                   review.review_id, review.rating, review.comments
             FROM Orders o
             JOIN Restaurants r ON r.restaurant_id = o.restaurant_id
             JOIN Users u ON u.user_id = o.user_id
+            LEFT JOIN Reviews review ON review.order_id = o.order_id AND review.user_id = o.user_id
             WHERE {status_sql}{restaurant_sql}
             ORDER BY o.created_at {"ASC" if view == "active" else "DESC"}
             """,
@@ -456,8 +458,10 @@ def kitchen():
 
     orders = [
         {"order_id": oid, "created_at": created, "status": status, "total": total,
-         "restaurant": rname, "customer": email, "lines": items_by_order.get(oid, [])}
-        for oid, created, status, total, rname, email in order_rows
+         "restaurant": rname, "customer": email, "lines": items_by_order.get(oid, []),
+         "review": {"rating": int(rating), "comments": comments or ""}
+         if review_id is not None else None}
+        for oid, created, status, total, rname, email, review_id, rating, comments in order_rows
     ]
     return render_template(
         "kitchen.html", orders=orders, statuses=ORDER_STATUSES, view=view,

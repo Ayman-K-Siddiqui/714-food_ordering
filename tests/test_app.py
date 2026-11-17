@@ -276,7 +276,7 @@ class AppTests(unittest.TestCase):
             self.authenticate()
             self.query.side_effect = [
                 [(42, "staff@example.com", "Staff", "staff", 2)],
-                [(7, datetime(2026, 11, 9), "Ready", Decimal("12.99"), "Pizza Palace", "customer@example.com")],
+                [(7, datetime(2026, 11, 9), "Ready", Decimal("12.99"), "Pizza Palace", "customer@example.com", None, None, None)],
                 [(7, "Pizza", 2)],
             ]
             self.query.reset_mock()
@@ -284,11 +284,54 @@ class AppTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn(b"Pizza Palace", response.data)
             self.assertIn(b"Pizza", response.data)
+            self.assertIn(b"No customer review yet.", response.data)
             self.assertNotIn(b"All restaurants", response.data)
             for call in self.query.call_args_list[1:]:
                 self.assertIn("o.restaurant_id = :restaurant_id", call.args[0])
                 self.assertEqual(call.args[1], {"restaurant_id": 2})
             self.query.side_effect = None
+
+    def test_kitchen_displays_customer_review_in_both_tabs(self):
+        from datetime import datetime
+
+        for view, status in (("active", "Ready"), ("completed", "Completed")):
+            with self.subTest(view=view):
+                self.authenticate()
+                self.query.side_effect = [
+                    [(42, "staff@example.com", "Staff", "staff", 2)],
+                    [(7, datetime(2026, 11, 9), status, Decimal("12.99"),
+                      "Pizza Palace", "customer@example.com", 3, 4,
+                      "Tasty pizza! <script>alert('test')</script>")],
+                    [(7, "Pizza", 2)],
+                ]
+                response = self.client.get(f"/kitchen?view={view}&restaurant_id=1")
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(b'aria-label="4 out of 5 stars"', response.data)
+                self.assertIn("★★★★☆".encode(), response.data)
+                self.assertIn(b"Tasty pizza! &lt;script&gt;", response.data)
+                self.assertNotIn(b"<script>", response.data)
+                self.assertNotIn(b"No customer review yet.", response.data)
+                sql, params = self.query.call_args_list[-2].args
+                self.assertIn("LEFT JOIN Reviews", sql)
+                self.assertIn("review.user_id = o.user_id", sql)
+                self.assertIn("o.restaurant_id = :restaurant_id", sql)
+                self.assertEqual(params, {"restaurant_id": 2})
+                self.query.side_effect = None
+
+    def test_kitchen_displays_rating_without_comment(self):
+        from datetime import datetime
+
+        self.authenticate()
+        self.query.side_effect = [
+            [(42, "staff@example.com", "Staff", "staff", 2)],
+            [(7, datetime(2026, 11, 9), "Completed", Decimal("12.99"),
+              "Pizza Palace", "customer@example.com", 3, 5, None)],
+            [],
+        ]
+        response = self.client.get("/kitchen?view=completed")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'aria-label="5 out of 5 stars"', response.data)
+        self.assertNotIn(b"None", response.data)
 
     def test_status_update_cannot_target_another_restaurant(self):
         self.authenticate()
