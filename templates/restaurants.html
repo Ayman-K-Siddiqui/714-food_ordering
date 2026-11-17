@@ -2,43 +2,47 @@
 {% block title %}Choose a restaurant · Food Ordering{% endblock %}
 {% block content %}
     {% if not g.user %}
-        <section class="welcome-hero">
-            <div class="welcome-text">
-                <p class="welcome-eyebrow">Local food, delivered</p>
-                <h1>Your favourite local restaurants, all in one place.</h1>
-                <p class="welcome-lead">Browse menus, build your order and track it from the kitchen to your door.</p>
-                <div class="welcome-actions">
-                    <a class="button welcome-primary" href="{{ url_for('register') }}">Create an account</a>
-                    <a class="button welcome-secondary" href="{{ url_for('login') }}">Log in</a>
-                </div>
-            </div>
-            <ul class="welcome-steps" aria-label="How it works">
-                <li><span class="welcome-step-num">1</span><div><strong>Pick a restaurant</strong><span>Burgers, pizza, tacos and more.</span></div></li>
-                <li><span class="welcome-step-num">2</span><div><strong>Fill your cart</strong><span>Add items and adjust quantities.</span></div></li>
-                <li><span class="welcome-step-num">3</span><div><strong>Track your order</strong><span>Watch it go from Pending to Ready.</span></div></li>
-            </ul>
-        </section>
         <section class="intro">
-            <h2>Restaurants</h2>
-            <p class="description">Take a look around. Log in when you're ready to order.</p>
+            <p class="eyebrow">Open kitchens tonight</p>
+            <h1>Dinner, without the guesswork.</h1>
+            <p class="lede">Twelve neighbourhood spots on the board — smash burgers, late sushi, weekday biryani. Search by name or the kind of food you’re craving.</p>
         </section>
     {% else %}
-        <section class="intro welcome-back">
-            <h1>Hi {{ g.user.first_name or 'there' }}, what are you craving?</h1>
-            <p class="description">Choose a restaurant to explore its menu.</p>
+        <section class="intro">
+            <p class="eyebrow">Welcome back</p>
+            <h1>{{ g.user.first_name or 'Hey' }}, what’s calling your name?</h1>
+            <p class="lede">Your usual is a couple of taps away — or wander the list and find something new.</p>
         </section>
     {% endif %}
+    <form class="restaurant-search" method="get" action="{{ url_for('restaurants') }}">
+        <label for="q">Search restaurants</label>
+        <div class="restaurant-search-row">
+            <input id="q" name="q" type="search" value="{{ q }}" placeholder="Name or category, e.g. pizza">
+            <label for="category" class="visually-hidden">Category</label>
+            <select id="category" name="category">
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {{ 'selected' if selected_category == cat else '' }}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Search</button>
+        </div>
+    </form>
     {% if error %}
         <p class="error" role="alert">{{ error }}</p>
     {% elif not restaurants %}
-        <p>No restaurants are available yet. Check back soon.</p>
+        {% if q or selected_category %}
+            <p>No restaurants match that search. Try another name or category.</p>
+        {% else %}
+            <p>No restaurants are available yet. Check back soon.</p>
+        {% endif %}
     {% else %}
         <div class="restaurant-grid">
             {% for restaurant in restaurants %}
-                <article class="restaurant-card">
+                <article class="restaurant-card tone-{{ loop.index0 % 6 }}">
                     <h2>{{ restaurant.name }}</h2>
                     <p class="description">{{ restaurant.location or 'Location coming soon' }}</p>
-                    <a class="button" href="{{ url_for('restaurant_menu', restaurant_id=restaurant.restaurant_id) }}">View menu <span aria-hidden="true">→</span></a>
+                    <a class="button" href="{{ url_for('restaurant_menu', restaurant_id=restaurant.restaurant_id) }}">View menu</a>
                 </article>
             {% endfor %}
         </div>

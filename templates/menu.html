@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ restaurant.name }} · Menu{% endblock %}
 {% block content %}
-    <p><a href="{{ url_for('restaurants') }}">← All restaurants</a></p>
+    <p class="menu-back"><a href="{{ url_for('restaurants') }}">← All restaurants</a></p>
+    <p class="eyebrow">Tonight’s menu</p>
     <h1>{{ restaurant.name }}</h1>
-    <p class="description">{{ restaurant.location or '' }}</p>
+    <p class="lede">{{ restaurant.location or 'Around the corner' }} · made to order</p>
     {% if cart_message == "added" %}
         <p class="success">Added to cart. <a href="{{ url_for('cart') }}">View cart</a></p>
     {% elif cart_message == "error" %}

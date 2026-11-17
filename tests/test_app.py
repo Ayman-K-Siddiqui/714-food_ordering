@@ -56,7 +56,11 @@ class AppTests(unittest.TestCase):
 
     def test_session_survives_navigation_and_logout_clears_it(self):
         self.sign_in()
-        self.query.side_effect = [[(42, "user@example.com", "Hasan", "customer", None)], [(1, "Burger Joint", "123 Main St")]]
+        self.query.side_effect = [
+            [(42, "user@example.com", "Hasan", "customer", None)],
+            [("Burgers",)],
+            [(1, "Burger Joint", "123 Main St")],
+        ]
         response = self.client.get("/")
         self.assertIn(b"Hi, Hasan", response.data)
         self.assertIn(b"Burger Joint", response.data)
@@ -317,9 +321,79 @@ class AppTests(unittest.TestCase):
                 g.user = {"user_id": 42, "role": role, "first_name": "Test", "email": "test@example.com"}
                 html = render_template("base.html", cart_count=0)
             self.assertEqual('href="/kitchen"' in html, role == "staff")
+            self.assertEqual('href="/kitchen/menu"' in html, role == "staff")
             self.assertEqual('>Restaurants</a>' in html, role == "customer")
             self.assertEqual('href="/cart"' in html, role == "customer")
             self.assertEqual('>My Orders</a>' in html, role == "customer")
+
+    def test_home_search_filters_by_name_or_category(self):
+        self.query.side_effect = [
+            [("Pizza",), ("Burgers",)],
+            [(2, "Pizza Palace", "456 Queen St")],
+        ]
+        response = self.client.get("/?q=pizza&category=Pizza")
+        self.assertIn(b"Pizza Palace", response.data)
+        self.assertNotIn(b"Burger Joint", response.data)
+        sql, params = self.query.call_args.args
+        self.assertIn("LOWER(r.name) LIKE :pattern", sql)
+        self.assertIn("LOWER(m.category) = :category", sql)
+        self.assertEqual(params["pattern"], "%pizza%")
+        self.assertEqual(params["category"], "pizza")
+
+    def test_manage_menu_requires_staff(self):
+        self.assertEqual(self.client.get("/kitchen/menu").location, "/login")
+        self.assertEqual(self.post("/kitchen/menu", {"name": "Salad", "price": "5"}).location, "/login")
+        self.authenticate("customer", None)
+        self.assertEqual(self.client.get("/kitchen/menu").status_code, 403)
+        self.assertEqual(self.post("/kitchen/menu", {"name": "Salad", "price": "5"}).status_code, 403)
+        self.assertEqual(self.post("/kitchen/menu/7", {"price": "9.99"}).status_code, 403)
+        self.assertEqual(self.post("/kitchen/menu/7/visibility").status_code, 403)
+        self.connection.assert_not_called()
+
+    def test_manage_menu_lists_staff_restaurant_items(self):
+        self.authenticate()
+        self.query.side_effect = [
+            [(42, "staff@example.com", "Staff", "staff", 2)],
+            [("Pizza Palace",)],
+            [(7, "Margherita Pizza", "Basil", Decimal("12.99"), "Pizza", 1)],
+        ]
+        response = self.client.get("/kitchen/menu")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Margherita Pizza", response.data)
+        self.assertIn(b"Pizza Palace", response.data)
+        sql, params = self.query.call_args.args
+        self.assertIn("FROM MenuItems", sql)
+        self.assertEqual(params["restaurant_id"], 2)
+
+    def test_add_menu_item_uses_staff_restaurant(self):
+        self.authenticate()
+        with patch("app.run_write") as write:
+            response = self.post("/kitchen/menu", {
+                "name": "Garlic Bread",
+                "description": "Toasted",
+                "price": "4.50",
+                "category": "Sides",
+                "restaurant_id": "1",
+            })
+        write.assert_called_once()
+        sql, params = write.call_args.args
+        self.assertIn("INSERT INTO MenuItems", sql)
+        self.assertEqual(params["restaurant_id"], 2)
+        self.assertEqual(params["name"], "Garlic Bread")
+        self.assertEqual(params["price"], Decimal("4.50"))
+        self.assertEqual(response.location, "/kitchen/menu?menu=added")
+
+    def test_edit_and_hide_cannot_target_another_restaurant(self):
+        self.authenticate()
+        cursor = self.connection.return_value.cursor.return_value.__enter__.return_value
+        cursor.rowcount = 0
+        self.assertEqual(self.post("/kitchen/menu/7", {"price": "11.00", "description": "New"}).status_code, 404)
+        self.assertEqual(cursor.execute.call_args.args[1]["restaurant_id"], 2)
+        cursor.rowcount = 1
+        response = self.post("/kitchen/menu/7/visibility")
+        self.assertEqual(response.location, "/kitchen/menu?menu=visibility")
+        self.assertEqual(cursor.execute.call_args.args[1]["restaurant_id"], 2)
+        self.assertIn("is_available", cursor.execute.call_args.args[0])
 
 
 if __name__ == "__main__":

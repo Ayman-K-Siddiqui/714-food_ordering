@@ -2,8 +2,9 @@
 {% block title %}Log in · Food Ordering{% endblock %}
 {% block content %}
     <section class="auth-card">
-        <h1>Welcome back</h1>
-        <p class="description">Log in to your Food Ordering account.</p>
+        <p class="eyebrow">Your table’s waiting</p>
+        <h1>Welcome back.</h1>
+        <p class="lede">Sign in to pick up where you left off — cart, orders, the usual.</p>
         {% if registered %}<p class="success" role="status">Your account has been created. You can now log in.</p>{% endif %}
         {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
         <form method="post">

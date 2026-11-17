@@ -2,7 +2,9 @@
 {% block title %}Create account · Food Ordering{% endblock %}
 {% block content %}
     <section class="auth-card">
-        <h1>Create an account</h1>
+        <p class="eyebrow">Join the neighbourhood</p>
+        <h1>Pull up a chair.</h1>
+        <p class="lede">One account for menus, carts, and tracking dinner from the pass to your door.</p>
         {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
         <form method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

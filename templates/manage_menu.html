@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Manage menu · {{ restaurant_name }}{% endblock %}
+{% block content %}
+<section class="manage-menu-page">
+    <p class="eyebrow">{{ restaurant_name }}</p>
+    <h1>Tonight’s board</h1>
+    <p class="lede">Add a dish, tweak a price, or take something off the floor before the rush.</p>
+
+    {% if menu_message == "added" %}
+        <p class="success" role="status">Menu item added.</p>
+    {% elif menu_message == "updated" %}
+        <p class="success" role="status">Item updated.</p>
+    {% elif menu_message == "visibility" %}
+        <p class="success" role="status">Item visibility updated.</p>
+    {% elif menu_message == "invalid" %}
+        <p class="error">Name and a price greater than 0 are required.</p>
+    {% elif menu_message == "error" %}
+        <p class="error">Could not update the menu. Please try again.</p>
+    {% endif %}
+
+    <section class="manage-add">
+        <h2>Add item</h2>
+        <form method="post" action="{{ url_for('add_menu_item') }}" class="manage-add-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="manage-field">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" maxlength="100" value="{{ form_data.name }}" required>
+            </div>
+            <div class="manage-field">
+                <label for="category">Category</label>
+                <input id="category" name="category" type="text" maxlength="50" value="{{ form_data.category }}" placeholder="Burgers">
+            </div>
+            <div class="manage-field manage-field-price">
+                <label for="price">Price</label>
+                <input id="price" name="price" type="number" min="0.01" step="0.01" value="{{ form_data.price }}" required>
+            </div>
+            <div class="manage-field manage-field-wide">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="2" maxlength="255">{{ form_data.description }}</textarea>
+            </div>
+            <button type="submit">Add to menu</button>
+        </form>
+    </section>
+
+    {% if not items %}
+        <p>No items yet. Add one above.</p>
+    {% else %}
+        <ul class="manage-list">
+            {% for item in items %}
+                <li class="manage-item {{ 'hidden-item' if not item.is_available else '' }}">
+                    <div class="manage-item-head">
+                        <strong>{{ item.name }}</strong>
+                        {% if not item.is_available %}
+                            <span class="hidden-badge">Hidden</span>
+                        {% endif %}
+                        <span class="description">{{ item.category or 'Uncategorized' }}</span>
+                    </div>
+                    <form method="post" action="{{ url_for('update_menu_item', item_id=item.item_id) }}" class="manage-edit-form" id="edit-item-{{ item.item_id }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="manage-field manage-field-price">
+                            <label for="price-{{ item.item_id }}">Price</label>
+                            <input id="price-{{ item.item_id }}" name="price" type="number" min="0.01" step="0.01" value="{{ '%.2f'|format(item.price) }}" required>
+                        </div>
+                        <div class="manage-field">
+                            <label for="description-{{ item.item_id }}">Description</label>
+                            <textarea id="description-{{ item.item_id }}" name="description" rows="2" maxlength="255">{{ item.description or '' }}</textarea>
+                        </div>
+                    </form>
+                    <div class="manage-item-buttons">
+                        <button type="submit" form="edit-item-{{ item.item_id }}">Save</button>
+                        <form method="post" action="{{ url_for('toggle_menu_item', item_id=item.item_id) }}" class="manage-visibility-form">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="button-secondary">
+                                {{ 'Show on menu' if not item.is_available else 'Hide from customers' }}
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</section>
+{% endblock %}

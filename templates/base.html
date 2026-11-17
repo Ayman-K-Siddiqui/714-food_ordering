@@ -5,31 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Food Ordering{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <header class="site-header">
-        <a class="brand" href="{{ url_for('kitchen' if g.user and g.user.role == 'staff' else 'restaurants') }}">Food Ordering</a>
+        <a class="brand" href="{{ url_for('kitchen' if g.user and g.user.role == 'staff' else 'restaurants') }}">
+            <span class="brand-mark" aria-hidden="true">
+                <span></span><span></span>
+            </span>
+            <span class="brand-copy">
+                <span class="brand-name">Food Ordering</span>
+                <span class="brand-tag">Neighborhood kitchens, delivered</span>
+            </span>
+        </a>
         <nav aria-label="Main navigation">
             {% if not g.user or g.user.role == 'customer' %}
-                <a href="{{ url_for('restaurants') }}">Restaurants</a>
+                <a class="nav-link" href="{{ url_for('restaurants') }}">Restaurants</a>
             {% endif %}
             {% if g.user %}
                 {% if g.user.role == 'staff' %}
-                <a href="{{ url_for('kitchen') }}">Kitchen</a>
+                <a class="nav-link" href="{{ url_for('kitchen') }}">Kitchen</a>
+                <a class="nav-link" href="{{ url_for('manage_menu') }}">Manage menu</a>
                 {% else %}
-                <a href="{{ url_for('orders') }}">My Orders</a>
-                <a class="nav-cart" href="{{ url_for('cart') }}">Cart{% if cart_count %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
+                <a class="nav-link" href="{{ url_for('orders') }}">My Orders</a>
+                <a class="nav-link nav-cart" href="{{ url_for('cart') }}">Cart{% if cart_count %} <span class="cart-badge">{{ cart_count }}</span>{% endif %}</a>
                 {% endif %}
-                <span>Hi, {{ g.user.first_name or g.user.email }}</span>
+                <span class="nav-hello">Hi, {{ g.user.first_name or g.user.email }}</span>
                 <form method="post" action="{{ url_for('logout') }}" class="logout-form">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit">Log out</button>
                 </form>
             {% else %}
-                <a href="{{ url_for('login') }}">Log in</a>
-                <a href="{{ url_for('register') }}">Create account</a>
+                <a class="nav-link" href="{{ url_for('login') }}">Log in</a>
+                <a class="nav-cta" href="{{ url_for('register') }}">Create account</a>
             {% endif %}
         </nav>
     </header>

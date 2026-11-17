@@ -1,6 +1,7 @@
 import os
 import secrets
 from datetime import timedelta
+from decimal import Decimal, InvalidOperation
 from functools import wraps
 from collections import OrderedDict
 
@@ -291,16 +292,58 @@ def place_order(user_id):
 ORDER_STATUSES = ["Pending", "Preparing", "Ready", "Completed"]
 
 
+def parse_price(value):
+    try:
+        price = Decimal(str(value).strip())
+    except (InvalidOperation, AttributeError):
+        return None
+    if price <= 0 or price > Decimal("999999.99"):
+        return None
+    return price.quantize(Decimal("0.01"))
+
+
 @app.route("/")
 def restaurants():
     error = None
     stores = []
+    categories = []
+    q = (request.args.get("q") or "").strip()
+    category = (request.args.get("category") or "").strip()
     try:
-        rows = query_rows("SELECT restaurant_id, name, location FROM Restaurants ORDER BY name")
+        categories = [
+            row[0] for row in query_rows(
+                "SELECT DISTINCT category FROM MenuItems WHERE category IS NOT NULL ORDER BY category"
+            )
+        ]
+        sql = """
+            SELECT DISTINCT r.restaurant_id, r.name, r.location
+            FROM Restaurants r
+            LEFT JOIN MenuItems m ON m.restaurant_id = r.restaurant_id
+            WHERE 1 = 1
+        """
+        params = {}
+        if q:
+            sql += """
+                AND (LOWER(r.name) LIKE :pattern
+                     OR LOWER(NVL(m.category, '')) LIKE :pattern)
+            """
+            params["pattern"] = f"%{q.lower()}%"
+        if category:
+            sql += " AND LOWER(m.category) = :category"
+            params["category"] = category.lower()
+        sql += " ORDER BY r.name"
+        rows = query_rows(sql, params)
         stores = [dict(zip(("restaurant_id", "name", "location"), row)) for row in rows]
     except oracledb.Error:
         error = "Could not load restaurants. Please try again shortly."
-    return render_template("restaurants.html", restaurants=stores, error=error), 503 if error else 200
+    return render_template(
+        "restaurants.html",
+        restaurants=stores,
+        error=error,
+        q=q,
+        selected_category=category,
+        categories=categories,
+    ), 503 if error else 200
 
 
 @app.route("/menu")
@@ -447,6 +490,142 @@ def update_order_status(order_id):
         "kitchen",
         view=request.form.get("view", "active"),
     ))
+
+
+def get_manageable_menu_items(restaurant_id):
+    rows = query_rows(
+        """
+        SELECT item_id, name, description, price, category, is_available
+        FROM MenuItems
+        WHERE restaurant_id = :restaurant_id
+        ORDER BY category, name
+        """,
+        {"restaurant_id": restaurant_id},
+    )
+    return [
+        dict(zip(("item_id", "name", "description", "price", "category", "is_available"), row))
+        for row in rows
+    ]
+
+
+@app.route("/kitchen/menu")
+@staff_required
+def manage_menu():
+    restaurant_id = g.user["restaurant_id"]
+    try:
+        name_rows = query_rows(
+            "SELECT name FROM Restaurants WHERE restaurant_id = :restaurant_id",
+            {"restaurant_id": restaurant_id},
+        )
+        if not name_rows:
+            abort(404)
+        items = get_manageable_menu_items(restaurant_id)
+    except oracledb.Error:
+        return render_template("unavailable.html"), 503
+    return render_template(
+        "manage_menu.html",
+        restaurant_name=name_rows[0][0],
+        items=items,
+        menu_message=request.args.get("menu"),
+        form_data={
+            "name": request.args.get("name", ""),
+            "description": request.args.get("description", ""),
+            "price": request.args.get("price", ""),
+            "category": request.args.get("category", ""),
+        },
+    )
+
+
+@app.route("/kitchen/menu", methods=["POST"])
+@staff_required
+def add_menu_item():
+    name = (request.form.get("name") or "").strip()
+    description = (request.form.get("description") or "").strip()[:255]
+    category = (request.form.get("category") or "").strip()[:50]
+    price = parse_price(request.form.get("price"))
+    if not name or price is None:
+        return redirect(url_for(
+            "manage_menu",
+            menu="invalid",
+            name=name,
+            description=description,
+            price=request.form.get("price", ""),
+            category=category,
+        ))
+    try:
+        run_write(
+            """
+            INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+            VALUES (:name, :description, :price, :category, 1, :restaurant_id)
+            """,
+            {
+                "name": name[:100],
+                "description": description or None,
+                "price": price,
+                "category": category or None,
+                "restaurant_id": g.user["restaurant_id"],
+            },
+        )
+    except oracledb.Error:
+        return redirect(url_for("manage_menu", menu="error"))
+    return redirect(url_for("manage_menu", menu="added"))
+
+
+@app.route("/kitchen/menu/<int:item_id>", methods=["POST"])
+@staff_required
+def update_menu_item(item_id):
+    description = (request.form.get("description") or "").strip()[:255]
+    price = parse_price(request.form.get("price"))
+    if price is None:
+        return redirect(url_for("manage_menu", menu="invalid"))
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE MenuItems
+                SET description = :description, price = :price
+                WHERE item_id = :item_id AND restaurant_id = :restaurant_id
+                """,
+                {
+                    "description": description or None,
+                    "price": price,
+                    "item_id": item_id,
+                    "restaurant_id": g.user["restaurant_id"],
+                },
+            )
+            if cursor.rowcount == 0:
+                abort(404)
+        connection.commit()
+    except oracledb.Error:
+        return render_template("unavailable.html"), 503
+    finally:
+        connection.close()
+    return redirect(url_for("manage_menu", menu="updated"))
+
+
+@app.route("/kitchen/menu/<int:item_id>/visibility", methods=["POST"])
+@staff_required
+def toggle_menu_item(item_id):
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                UPDATE MenuItems
+                SET is_available = CASE WHEN is_available = 1 THEN 0 ELSE 1 END
+                WHERE item_id = :item_id AND restaurant_id = :restaurant_id
+                """,
+                {"item_id": item_id, "restaurant_id": g.user["restaurant_id"]},
+            )
+            if cursor.rowcount == 0:
+                abort(404)
+        connection.commit()
+    except oracledb.Error:
+        return render_template("unavailable.html"), 503
+    finally:
+        connection.close()
+    return redirect(url_for("manage_menu", menu="visibility"))
 
 
 def get_cart(user_id):

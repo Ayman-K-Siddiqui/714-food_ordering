@@ -113,6 +113,12 @@ INSERT INTO MenuItems (name, description, price, category, is_available, restaur
 VALUES ('Cola', 'Fountain drink', 1.99, 'Drinks', 1, 1);
 INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
 VALUES ('Lemonade', 'Freshly squeezed', 2.49, 'Drinks', 1, 1);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Bacon Burger', 'Crispy bacon, cheddar and BBQ sauce', 11.49, 'Burgers', 1, 1);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Onion Rings', 'Beer-battered rings with ranch', 4.79, 'Sides', 1, 1);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Chocolate Shake', 'Thick shake with whipped cream', 4.99, 'Drinks', 1, 1);
 
 -- Pizza Palace (restaurant_id = 2)
 INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
@@ -125,6 +131,10 @@ INSERT INTO MenuItems (name, description, price, category, is_available, restaur
 VALUES ('Caesar Salad', 'Romaine, parmesan, croutons', 7.99, 'Sides', 1, 2);
 INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
 VALUES ('Iced Tea', 'Peach iced tea', 2.29, 'Drinks', 1, 2);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('BBQ Chicken Pizza', 'BBQ sauce, mozzarella and grilled chicken', 15.49, 'Pizza', 1, 2);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Tiramisu', 'Espresso-soaked ladyfingers', 6.49, 'Desserts', 1, 2);
 
 -- Taco Town (restaurant_id = 3)
 INSERT INTO Restaurants (name, location) VALUES ('Taco Town', '789 King St');
@@ -138,6 +148,163 @@ INSERT INTO MenuItems (name, description, price, category, is_available, restaur
 VALUES ('Chips and Guac', 'Fresh guacamole with tortilla chips', 5.99, 'Sides', 1, 3);
 INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
 VALUES ('Horchata', 'Sweet rice and cinnamon drink', 3.49, 'Drinks', 1, 3);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Carne Asada Tacos', 'Grilled steak, onion and cilantro', 12.99, 'Tacos', 1, 3);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Churros', 'Cinnamon sugar with chocolate dip', 4.99, 'Desserts', 1, 3);
+
+-- Sushi Garden (restaurant_id = 4)
+INSERT INTO Restaurants (name, location) VALUES ('Sushi Garden', '22 Harbour Ave');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Salmon Nigiri', 'Four pieces of fresh salmon nigiri', 9.99, 'Sushi', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('California Roll', 'Crab, avocado and cucumber', 8.49, 'Sushi', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Spicy Tuna Roll', 'Tuna, chili mayo and sesame', 10.49, 'Sushi', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Miso Soup', 'Tofu, seaweed and green onion', 3.49, 'Sides', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Edamame', 'Sea-salted soybeans', 4.29, 'Sides', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Green Tea', 'Hot or iced Japanese green tea', 2.49, 'Drinks', 1, 4);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Mochi Ice Cream', 'Assorted trio of mochi', 5.99, 'Desserts', 1, 4);
+
+-- Pasta Nonna (restaurant_id = 5)
+INSERT INTO Restaurants (name, location) VALUES ('Pasta Nonna', '88 Olive Lane');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Spaghetti Carbonara', 'Pancetta, egg and pecorino', 16.49, 'Pasta', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Fettuccine Alfredo', 'Creamy parmesan sauce', 15.99, 'Pasta', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Lasagna', 'Beef ragu and three cheeses', 17.49, 'Pasta', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Caprese Salad', 'Tomato, mozzarella and balsamic', 8.99, 'Salads', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Garlic Bread', 'Toasted baguette with herbs', 4.49, 'Sides', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('House Red Wine', 'Glass of Italian red', 7.99, 'Drinks', 1, 5);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Panna Cotta', 'Vanilla cream with berry sauce', 6.49, 'Desserts', 1, 5);
+
+-- Seoul Kitchen (restaurant_id = 6)
+INSERT INTO Restaurants (name, location) VALUES ('Seoul Kitchen', '15 Maple Rd');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Bibimbap', 'Rice, vegetables, egg and gochujang', 14.99, 'Rice Bowls', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Bulgogi Bowl', 'Marinated beef over rice', 16.49, 'Rice Bowls', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Kimchi Fried Rice', 'Kimchi, pork and fried egg', 13.49, 'Rice Bowls', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Korean Fried Chicken', 'Crispy wings with sweet chili', 12.99, 'Sides', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Mandu', 'Steamed dumplings', 7.49, 'Sides', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Barley Tea', 'Toasted barley iced tea', 2.49, 'Drinks', 1, 6);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Bingsu', 'Shaved ice with condensed milk', 8.49, 'Desserts', 1, 6);
+
+-- The Green Bowl (restaurant_id = 7)
+INSERT INTO Restaurants (name, location) VALUES ('The Green Bowl', '401 Park St');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Harvest Bowl', 'Quinoa, roasted veg and tahini', 13.49, 'Bowls', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Chicken Caesar Bowl', 'Grilled chicken, romaine, parmesan', 13.99, 'Bowls', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Poke Bowl', 'Tuna, rice, edamame and mango', 15.49, 'Bowls', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Kale Salad', 'Kale, apple, walnuts and lemon', 10.99, 'Salads', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Hummus Plate', 'Hummus, pita and cucumber', 8.49, 'Sides', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Kombucha', 'Ginger lemon kombucha', 4.29, 'Drinks', 1, 7);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Chia Pudding', 'Coconut chia with berries', 5.49, 'Desserts', 1, 7);
+
+-- Sunrise Diner (restaurant_id = 8)
+INSERT INTO Restaurants (name, location) VALUES ('Sunrise Diner', '9 Early Ave');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Pancake Stack', 'Three pancakes with maple syrup', 11.49, 'Breakfast', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Eggs Benedict', 'Poached eggs, ham and hollandaise', 13.99, 'Breakfast', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Avocado Toast', 'Sourdough, avocado and chili flakes', 10.49, 'Breakfast', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Club Sandwich', 'Turkey, bacon, lettuce and tomato', 12.49, 'Sandwiches', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Home Fries', 'Crispy breakfast potatoes', 3.99, 'Sides', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Fresh Orange Juice', 'Squeezed to order', 3.79, 'Drinks', 1, 8);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Coffee', 'House drip coffee', 2.49, 'Drinks', 1, 8);
+
+-- Smoke & Oak BBQ (restaurant_id = 9)
+INSERT INTO Restaurants (name, location) VALUES ('Smoke & Oak BBQ', '250 Pit Rd');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Brisket Plate', 'Sliced brisket with two sides', 18.99, 'BBQ', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Pulled Pork Sandwich', 'Smoked pork, slaw and pickles', 13.49, 'Sandwiches', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Ribs Half Rack', 'Dry-rubbed pork ribs', 17.99, 'BBQ', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Mac and Cheese', 'Smoked cheddar mac', 5.99, 'Sides', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Cornbread', 'Honey butter cornbread', 3.49, 'Sides', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Sweet Tea', 'Southern-style iced tea', 2.29, 'Drinks', 1, 9);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Peach Cobbler', 'Warm cobbler with vanilla ice cream', 6.49, 'Desserts', 1, 9);
+
+-- Sweet Cloud (restaurant_id = 10)
+INSERT INTO Restaurants (name, location) VALUES ('Sweet Cloud', '77 Sugar St');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Fudge Brownie', 'Warm brownie with ice cream', 6.99, 'Desserts', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Cheesecake Slice', 'New York style with berry sauce', 7.49, 'Desserts', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Soft Serve', 'Vanilla, chocolate or swirl', 4.49, 'Desserts', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Cookie Dozen', 'Assorted house cookies', 8.99, 'Desserts', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Banana Split', 'Three scoops, toppings and cream', 8.49, 'Desserts', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Milkshake', 'Hand-spun chocolate or strawberry', 5.49, 'Drinks', 1, 10);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Hot Chocolate', 'With marshmallows', 3.99, 'Drinks', 1, 10);
+
+-- Curry House (restaurant_id = 11)
+INSERT INTO Restaurants (name, location) VALUES ('Curry House', '310 Spice Blvd');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Butter Chicken', 'Creamy tomato curry with naan', 15.99, 'Curry', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Chana Masala', 'Chickpea curry, vegan', 13.49, 'Curry', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Lamb Biryani', 'Fragrant basmati rice and lamb', 17.49, 'Rice Bowls', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Garlic Naan', 'Tandoor-baked garlic bread', 3.99, 'Sides', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Samosas', 'Two potato-and-pea samosas', 5.49, 'Sides', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Mango Lassi', 'Sweet yogurt mango drink', 3.99, 'Drinks', 1, 11);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Gulab Jamun', 'Warm milk dumplings in syrup', 4.99, 'Desserts', 1, 11);
+
+-- Mediterranean Grill (restaurant_id = 12)
+INSERT INTO Restaurants (name, location) VALUES ('Mediterranean Grill', '64 Cedar Way');
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Chicken Shawarma Wrap', 'Pickles, garlic sauce and fries', 12.99, 'Wraps', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Falafel Plate', 'Falafel, hummus, salad and pita', 13.49, 'Plates', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Lamb Kebab', 'Grilled lamb with rice and salad', 16.99, 'Plates', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Greek Salad', 'Cucumber, feta, olives and oregano', 9.49, 'Salads', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Baba Ganoush', 'Smoky eggplant dip with pita', 6.49, 'Sides', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Mint Lemonade', 'Fresh mint and lemon', 3.29, 'Drinks', 1, 12);
+INSERT INTO MenuItems (name, description, price, category, is_available, restaurant_id)
+VALUES ('Baklava', 'Honey pistachio pastry', 4.79, 'Desserts', 1, 12);
 
 -- Local development test login: test@example.com / password
 -- Hash generated by werkzeug.security.generate_password_hash, matching registration.
@@ -156,10 +323,19 @@ SELECT CASE restaurant_id
            WHEN 1 THEN 'burger.staff@example.com'
            WHEN 2 THEN 'pizza.staff@example.com'
            WHEN 3 THEN 'taco.staff@example.com'
+           WHEN 4 THEN 'sushi.staff@example.com'
+           WHEN 5 THEN 'pasta.staff@example.com'
+           WHEN 6 THEN 'seoul.staff@example.com'
+           WHEN 7 THEN 'greenbowl.staff@example.com'
+           WHEN 8 THEN 'sunrise.staff@example.com'
+           WHEN 9 THEN 'bbq.staff@example.com'
+           WHEN 10 THEN 'sweetcloud.staff@example.com'
+           WHEN 11 THEN 'curry.staff@example.com'
+           WHEN 12 THEN 'medgrill.staff@example.com'
        END,
        'scrypt:32768:8:1$z3HavGn8ET4npZpJ$14775cfe02187006c0ca37d61cf3bd247c14b14a30380fabd7d72bd87e9a54c2555f34edd3770d23052312e12d7fd32f645d0a259d30139f084c7766d41592b5',
        name || ' Staff', 'staff', restaurant_id
 FROM Restaurants
-WHERE restaurant_id IN (1, 2, 3);
+WHERE restaurant_id BETWEEN 1 AND 12;
 
 COMMIT;

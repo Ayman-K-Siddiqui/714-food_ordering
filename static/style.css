@@ -1,26 +1,26 @@
 /* =========================================================
-   Shared theme - Food Ordering (blue, Uber Eats style)
-   Use these variables in page CSS: var(--primary, #1A56FF)
+   Shared theme
    ========================================================= */
 :root {
-    --primary: #1A56FF;       /* buttons, links, highlights */
-    --primary-dark: #0B1F4D;  /* header text, hover, headings */
-    --primary-soft: #E8EFFF;  /* light blue fills */
-    --accent: #FFC93C;        /* prices, badges */
-    --bg: #F5F7FB;            /* page background */
-    --card: #FFFFFF;          /* cards, forms */
-    --text: #0F172A;          /* main text */
-    --muted: #64748B;         /* secondary text */
-    --border: #E2E8F0;        /* subtle dividers */
-    --success-bg: #DCFCE7;
-    --success-text: #166534;
-    --error-bg: #FEE2E2;
-    --error-text: #991B1B;
-    --radius: 14px;
-    --shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
-    --shadow-hover: 0 10px 24px rgba(15, 23, 42, 0.14);
-    --font: "Inter", Arial, sans-serif;
-    --page-width: 960px;
+    --primary: #d94b2b;
+    --primary-dark: #b03a20;
+    --primary-soft: #ffe8e0;
+    --accent: #f0b429;
+    --bg: #fff6ee;
+    --card: #ffffff;
+    --text: #2a211c;
+    --muted: #7a6a60;
+    --border: #f0d9c8;
+    --success-bg: #e4f5e8;
+    --success-text: #1f6b3a;
+    --error-bg: #fde8e4;
+    --error-text: #b42318;
+    --radius: 10px;
+    --shadow: 0 8px 20px rgba(180, 90, 40, 0.08);
+    --shadow-hover: 0 12px 24px rgba(180, 90, 40, 0.14);
+    --font: "Nunito", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Fraunces", Georgia, serif;
+    --page-width: 1040px;
 }
 
 * {
@@ -30,7 +30,10 @@
 body {
     margin: 0;
     font-family: var(--font);
-    background: var(--bg);
+    background:
+        radial-gradient(circle at top left, #ffe3c2 0, transparent 28%),
+        radial-gradient(circle at 90% 8%, #ffd6d0 0, transparent 24%),
+        var(--bg);
     color: var(--text);
     line-height: 1.5;
 }
@@ -48,66 +51,117 @@ a:hover {
 
 /* ---------- Header / nav ---------- */
 .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding: 14px max(16px, calc((100% - var(--page-width)) / 2));
-    background: var(--card);
-    box-shadow: 0 1px 0 var(--border), 0 2px 10px rgba(15, 23, 42, 0.04);
+    gap: 16px 32px;
+    padding: 18px max(20px, calc((100% - var(--page-width)) / 2));
+    background: rgba(255, 250, 245, 0.92);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 .brand {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: var(--primary-dark);
-    letter-spacing: -0.02em;
-}
-
-.brand::before {
-    content: "";
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin-right: 8px;
-    border-radius: 50%;
-    background: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-soft);
-    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
 }
 
 .brand:hover {
     text-decoration: none;
 }
 
+.brand-mark {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    flex: none;
+}
+
+.brand-mark span {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.brand-mark span:first-child {
+    inset: 0;
+    background: var(--primary);
+}
+
+.brand-mark span:last-child {
+    inset: 9px;
+    background: var(--accent);
+    box-shadow: 6px 7px 0 #2a9d8f;
+}
+
+.brand-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.brand-name {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+}
+
+.brand-tag {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
 nav {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 4px 8px;
 }
 
-nav > a,
-nav > span {
-    padding: 8px 12px;
-    border-radius: 999px;
+.nav-link,
+.nav-hello {
+    padding: 8px 14px;
     color: var(--text);
-    font-weight: 600;
+    font-weight: 700;
 }
 
-nav > a:hover {
-    background: var(--primary-soft);
+.nav-link:hover {
     color: var(--primary);
     text-decoration: none;
+    background: var(--primary-soft);
+    border-radius: 999px;
 }
 
-nav > span {
+.nav-hello {
     color: var(--muted);
-    font-weight: 500;
+    font-weight: 700;
+    font-style: italic;
+    font-family: var(--font-display);
+}
+
+.nav-cta {
+    margin-left: 6px;
+    padding: 10px 18px;
+    color: #fff;
+    background: var(--primary);
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.nav-cta:hover {
+    color: #fff;
+    background: var(--primary-dark);
+    text-decoration: none;
 }
 
 .logout-form {
@@ -117,14 +171,15 @@ nav > span {
 
 .logout-form button {
     margin: 0;
-    background: transparent;
-    color: var(--primary-dark);
-    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    border-radius: 999px;
 }
 
 .logout-form button:hover {
-    background: var(--primary-soft);
-    color: var(--primary);
+    background: var(--primary);
+    color: #fff;
 }
 
 /* ---------- Page layout ---------- */
@@ -134,18 +189,45 @@ main {
     padding: 28px 16px 48px;
 }
 
+h1, h2, .brand-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+}
+
 h1 {
-    font-size: 2rem;
-    line-height: 1.2;
-    margin: 0 0 8px;
-    color: var(--primary-dark);
-    letter-spacing: -0.02em;
+    font-size: clamp(2.1rem, 4vw, 3.1rem);
+    line-height: 1.12;
+    margin: 0 0 12px;
+    color: var(--text);
+}
+
+.intro h1,
+.auth-card h1 {
+    max-width: 16ch;
 }
 
 h2 {
-    font-size: 1.3rem;
-    margin: 28px 0 12px;
+    font-size: 1.45rem;
+    margin: 32px 0 14px;
     color: var(--text);
+}
+
+.eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary);
+}
+
+.lede {
+    margin: 0 0 8px;
+    max-width: 42em;
+    font-size: 1.12rem;
+    line-height: 1.55;
+    color: var(--muted);
 }
 
 ul {
@@ -159,14 +241,16 @@ ul {
 }
 
 .intro {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
+    padding-bottom: 8px;
 }
 
 /* ---------- Messages ---------- */
 .error,
 .success {
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     font-weight: 500;
 }
 
@@ -186,25 +270,23 @@ button,
     display: inline-block;
     width: fit-content;
     margin-top: 8px;
-    padding: 10px 20px;
+    padding: 9px 16px;
     font: inherit;
     font-weight: 700;
     color: #FFFFFF;
     background: var(--primary);
-    border: none;
+    border: 1px solid var(--primary);
     border-radius: 999px;
     cursor: pointer;
     text-decoration: none;
-    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 button:hover,
 .button:hover {
     background: var(--primary-dark);
+    border-color: var(--primary-dark);
     color: #FFFFFF;
     text-decoration: none;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(26, 86, 255, 0.25);
 }
 
 /* ---------- Forms ---------- */
@@ -223,11 +305,182 @@ input,
 select {
     font: inherit;
     min-width: 0;
-    padding: 10px 12px;
+    padding: 8px 10px;
     color: var(--text);
     background: var(--card);
-    border: 1px solid #CBD5E1;
-    border-radius: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.button-secondary {
+    background: var(--card, #FFFFFF);
+    color: var(--primary-dark, #0B1F4D);
+    box-shadow: inset 0 0 0 1px var(--border, #E2E8F0);
+}
+
+.button-secondary:hover {
+    background: var(--primary-soft, #E8EFFF);
+    color: var(--primary-dark, #0B1F4D);
+}
+
+.restaurant-search {
+    max-width: none;
+    margin: 0 0 24px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+.restaurant-search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: end;
+}
+
+.restaurant-search-row input,
+.restaurant-search-row select {
+    flex: 1 1 180px;
+}
+
+.restaurant-search-row button {
+    margin-top: 0;
+}
+
+.manage-menu-page form {
+    max-width: none;
+}
+
+.manage-add {
+    margin: 20px 0 28px;
+    padding: 16px 0;
+    background: transparent;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+}
+
+.manage-add-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+    align-items: start;
+}
+
+.manage-add-form .manage-field-wide,
+.manage-add-form button {
+    grid-column: 1 / -1;
+}
+
+.manage-add-form textarea,
+.manage-edit-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    resize: vertical;
+}
+
+.manage-add-form button {
+    margin-top: 4px;
+}
+
+.manage-list {
+    display: grid;
+    gap: 16px;
+    padding: 0;
+}
+
+.manage-item {
+    display: grid;
+    gap: 14px;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+
+.manage-item.hidden-item {
+    opacity: 0.72;
+}
+
+.manage-item-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: baseline;
+}
+
+.manage-item-head .description {
+    margin: 0;
+}
+
+.hidden-badge {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.manage-edit-form {
+    display: grid;
+    gap: 12px;
+}
+
+.manage-field {
+    display: grid;
+    gap: 6px;
+}
+
+.manage-field-price {
+    max-width: 160px;
+}
+
+.manage-item-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.manage-item-buttons button,
+.manage-visibility-form {
+    margin: 0;
+}
+
+.manage-item-buttons .button-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.manage-visibility-form {
+    display: inline-grid;
+}
+
+@media (max-width: 700px) {
+    .manage-add-form {
+        grid-template-columns: 1fr;
+    }
 }
 
 input:focus,
@@ -243,12 +496,12 @@ select:focus {
 }
 
 .auth-card {
-    max-width: 440px;
+    max-width: 420px;
     margin: 24px auto;
-    padding: 28px;
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .auth-card form {
@@ -263,7 +516,7 @@ select:focus {
 /* ---------- Restaurant cards ---------- */
 .restaurant-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 18px;
 }
 
@@ -271,25 +524,33 @@ select:focus {
     position: relative;
     display: flex;
     flex-direction: column;
-    padding: 76px 20px 20px;
+    padding: 28px 18px 18px;
     background: var(--card);
-    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-radius: 16px;
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .restaurant-card::before {
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
-    height: 56px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    height: 12px;
+    background: var(--primary);
 }
+
+.restaurant-card.tone-0::before { background: #d94b2b; }
+.restaurant-card.tone-1::before { background: #e09f1f; }
+.restaurant-card.tone-2::before { background: #2a9d8f; }
+.restaurant-card.tone-3::before { background: #3d5a80; }
+.restaurant-card.tone-4::before { background: #c45c26; }
+.restaurant-card.tone-5::before { background: #6a994e; }
 
 .restaurant-card:hover {
     transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
+    border-color: #e8c4ae;
 }
 
 .restaurant-card h2 {
@@ -311,10 +572,11 @@ select:focus {
     grid-template-columns: 1fr auto;
     align-items: start;
     gap: 4px 16px;
-    margin-bottom: 12px;
-    padding: 16px 20px;
+    margin: 0 0 12px;
+    padding: 14px 16px;
     background: var(--card);
-    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-radius: 14px;
     box-shadow: var(--shadow);
 }
 
@@ -334,10 +596,11 @@ select:focus {
 
 .price {
     justify-self: end;
-    padding: 2px 12px;
+    padding: 3px 10px;
     font-weight: 700;
-    color: var(--text);
-    background: var(--accent);
+    font-variant-numeric: tabular-nums;
+    color: #7a3e00;
+    background: #ffe8b0;
     border-radius: 999px;
     white-space: nowrap;
 }
@@ -363,33 +626,34 @@ select:focus {
    Uses the shared theme variables, with fallbacks.
    ========================================================= */
 .kitchen-page {
-    background: var(--bg, #F5F7FB);
-    border-radius: var(--radius, 14px);
-    padding: 0 0 20px;
-    overflow: hidden;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    overflow: visible;
 }
 
 .kitchen-hero {
-    background: linear-gradient(135deg, var(--primary, #1A56FF), var(--primary-dark, #0B1F4D));
-    color: #FFFFFF;
-    padding: 24px 20px;
+    background: transparent;
+    color: var(--text);
+    padding: 0 0 16px;
     margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
 }
 
 .kitchen-page .kitchen-hero h1 {
-    color: #FFFFFF;
+    color: var(--text);
     margin: 0 0 4px;
 }
 
 .kitchen-page .kitchen-hero .kitchen-subtitle {
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--muted);
     margin: 0;
 }
 
 .kitchen-page .kitchen-orders,
 .kitchen-page .kitchen-empty {
-    margin-left: 16px;
-    margin-right: 16px;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .kitchen-subtitle,
@@ -419,7 +683,8 @@ select:focus {
     border-radius: var(--radius, 14px);
     box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
     padding: 18px 20px;
-    border-left: 6px solid var(--primary, #1A56FF);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
 }
 
 .kitchen-order-head {
@@ -442,11 +707,12 @@ select:focus {
 
 .kitchen-status {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
+    padding: 0;
+    border-radius: 0;
     font-size: 0.85rem;
-    font-weight: bold;
+    font-weight: 600;
     white-space: nowrap;
+    background: none;
 }
 
 .kitchen-status-pending   { background: #FEF3C7; color: #92400E; }
@@ -484,11 +750,11 @@ select:focus {
 }
 
 .kitchen-total {
-    font-weight: bold;
-    background: var(--accent, #FFC93C);
-    color: var(--text, #0F172A);
-    padding: 4px 12px;
-    border-radius: 999px;
+    font-weight: 600;
+    background: none;
+    color: var(--text);
+    padding: 0;
+    border-radius: 0;
 }
 
 .kitchen-page .kitchen-status-form {
@@ -514,12 +780,8 @@ select:focus {
 
 .kitchen-page .kitchen-status-form button {
     margin: 0;
-    background: var(--primary, #1A56FF);
-    color: #FFFFFF;
-    border: none;
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-weight: bold;
+    padding: 8px 14px;
+    font-weight: 600;
 }
 
 .kitchen-page .kitchen-status-form button:hover {
@@ -545,31 +807,34 @@ select:focus {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin: 0 16px 16px;
+    margin: 0 0 16px;
 }
 
 .kitchen-tabs {
     display: inline-flex;
-    padding: 4px;
-    background: var(--card, #FFFFFF);
-    border-radius: 999px;
-    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
+    gap: 16px;
+    padding: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .kitchen-tab {
-    padding: 8px 18px;
-    border-radius: 999px;
-    color: var(--muted, #64748B);
+    padding: 8px 0;
+    border-radius: 0;
+    color: var(--muted);
 }
 
 .kitchen-tab:hover {
     text-decoration: none;
-    color: var(--primary, #1A56FF);
+    color: var(--text);
 }
 
 .kitchen-tab.active {
-    background: var(--primary, #1A56FF);
-    color: #FFFFFF;
+    background: none;
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 var(--primary);
 }
 
 .kitchen-page .kitchen-filter {
@@ -626,13 +891,13 @@ select:focus {
     font-size: 0.8rem;
     line-height: 22px;
     text-align: center;
-    color: var(--text, #0F172A);
-    background: var(--accent, #FFC93C);
+    color: #2a211c;
+    background: var(--accent);
     border-radius: 999px;
 }
 
 .nav-cart {
-    background: var(--primary-soft, #E8EFFF);
+    background: transparent;
 }
 
 /* =========================================================
@@ -649,10 +914,11 @@ select:focus {
     grid-template-columns: 1fr auto auto auto;
     align-items: center;
     gap: 12px;
-    padding: 14px 18px;
-    background: var(--card, #FFFFFF);
-    border-radius: var(--radius, 14px);
-    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
 }
 
 .cart-item-info {
@@ -712,10 +978,10 @@ select:focus {
 
 .cart-total,
 .order-total {
-    padding: 2px 14px;
-    background: var(--accent, #FFC93C);
-    border-radius: 999px;
-    font-weight: 800;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    font-weight: 700;
 }
 
 .checkout-button {
@@ -753,19 +1019,19 @@ select:focus {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 16px 20px;
-    color: var(--text, #0F172A);
+    padding: 14px 16px;
+    color: var(--text);
     font-weight: 400;
-    background: var(--card, #FFFFFF);
-    border-radius: var(--radius, 14px);
-    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
 }
 
 .order-row:hover {
     text-decoration: none;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover, 0 10px 24px rgba(15, 23, 42, 0.14));
+    transform: none;
+    box-shadow: none;
 }
 
 .order-row .description {
@@ -783,23 +1049,24 @@ select:focus {
 
 .order-status {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
+    padding: 0;
+    border-radius: 0;
     font-size: 0.85rem;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
+    background: none;
 }
 
-.order-status-pending   { background: #FEF3C7; color: #92400E; }
-.order-status-preparing { background: #DBEAFE; color: #1E40AF; }
-.order-status-ready     { background: #DCFCE7; color: #166534; }
-.order-status-completed { background: #E2E8F0; color: #334155; }
+.order-status-pending   { color: #92400E; }
+.order-status-preparing { color: #1E40AF; }
+.order-status-ready     { color: #166534; }
+.order-status-completed { color: #57534e; }
 
 .order-card {
-    padding: 24px;
-    background: var(--card, #FFFFFF);
-    border-radius: var(--radius, 14px);
-    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .order-card-head {
@@ -820,9 +1087,9 @@ select:focus {
 }
 
 .order-progress li {
-    padding-top: 12px;
-    border-top: 5px solid var(--border, #E2E8F0);
-    color: var(--muted, #64748B);
+    padding-top: 8px;
+    border-top: 2px solid var(--border);
+    color: var(--muted);
     font-size: 0.85rem;
     font-weight: 600;
 }
@@ -850,11 +1117,12 @@ select:focus {
 }
 
 .review-card {
-    margin-top: 20px;
-    padding: 24px;
-    background: var(--card, #FFFFFF);
-    border-radius: var(--radius, 14px);
-    box-shadow: var(--shadow, 0 4px 14px rgba(15, 23, 42, 0.08));
+    margin-top: 28px;
+    padding: 20px 0 0;
+    background: transparent;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .review-card h2 {
@@ -883,10 +1151,9 @@ select:focus {
     width: 100%;
     font: inherit;
     padding: 8px;
-    border: 1px solid var(--border, #E2E8F0);
-    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     resize: vertical;
-}
 }
 
 @media (max-width: 640px) {
@@ -911,126 +1178,3 @@ select:focus {
 }
 
 
-/* =========================================================
-   Welcome page (home, logged out)
-   ========================================================= */
-.welcome-hero {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 28px;
-    align-items: center;
-    margin-bottom: 32px;
-    padding: 36px;
-    color: #FFFFFF;
-    background:
-        radial-gradient(circle at 85% 15%, rgba(255, 201, 60, 0.35), transparent 40%),
-        linear-gradient(135deg, var(--primary, #1A56FF), var(--primary-dark, #0B1F4D));
-    border-radius: 20px;
-    box-shadow: var(--shadow-hover, 0 10px 24px rgba(15, 23, 42, 0.14));
-}
-
-.welcome-eyebrow {
-    display: inline-block;
-    margin: 0 0 12px;
-    padding: 4px 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text, #0F172A);
-    background: var(--accent, #FFC93C);
-    border-radius: 999px;
-}
-
-.welcome-hero h1 {
-    margin: 0 0 12px;
-    font-size: 2.4rem;
-    color: #FFFFFF;
-}
-
-.welcome-lead {
-    margin: 0 0 20px;
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.85);
-}
-
-.welcome-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.welcome-actions .button {
-    margin: 0;
-    padding: 12px 22px;
-}
-
-.welcome-primary {
-    background: var(--accent, #FFC93C);
-    color: var(--text, #0F172A);
-}
-
-.welcome-primary:hover {
-    background: #FFFFFF;
-    color: var(--primary-dark, #0B1F4D);
-}
-
-.welcome-secondary {
-    background: rgba(255, 255, 255, 0.15);
-    color: #FFFFFF;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-}
-
-.welcome-secondary:hover {
-    background: #FFFFFF;
-    color: var(--primary-dark, #0B1F4D);
-}
-
-.welcome-hero .welcome-steps {
-    display: grid;
-    gap: 12px;
-    margin: 0;
-}
-
-.welcome-steps li {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-}
-
-.welcome-steps strong {
-    display: block;
-}
-
-.welcome-steps span:not(.welcome-step-num) {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.welcome-step-num {
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    font-weight: 800;
-    color: var(--primary-dark, #0B1F4D);
-    background: #FFFFFF;
-    border-radius: 50%;
-}
-
-.welcome-back h1 {
-    font-size: 1.8rem;
-}
-
-@media (max-width: 760px) {
-    .welcome-hero {
-        grid-template-columns: 1fr;
-        padding: 24px;
-    }
-
-    .welcome-hero h1 {
-        font-size: 1.8rem;
-    }
-}
